@@ -1,26 +1,35 @@
 # CollabBoard — Deployment Guide
 
-Get a live public URL in ~15 minutes using free tiers of:
-
-| Service | Purpose | Free? |
-|---------|---------|-------|
-| [MongoDB Atlas](https://cloud.mongodb.com) | Database | ✅ Free M0 |
-| [Railway](https://railway.app) | Backend (Node + Socket.IO) | ✅ $5 credit/mo |
-| [Vercel](https://vercel.com) | Frontend (React + Vite) | ✅ Free |
+This project deploys with:
+- **Frontend** → [Vercel](https://vercel.com) (free)
+- **Backend** → [Railway](https://railway.app) (free tier)
+- **Database** → [MongoDB Atlas](https://cloud.mongodb.com) (free M0 cluster)
 
 ---
 
-## Step 1 — Push your code to GitHub
+## Step 1 — MongoDB Atlas (database)
 
-If you haven't already:
+1. Go to https://cloud.mongodb.com → **Create a free account**
+2. Create a **free M0 cluster** (any region)
+3. Under **Database Access** → Add a database user (e.g. `collabboard` / strong password)
+4. Under **Network Access** → Add IP `0.0.0.0/0` (allow all — Railway needs this)
+5. Click **Connect** → **Drivers** → copy the connection string, e.g.:
+   ```
+   mongodb+srv://collabboard:<password>@cluster0.xxxxx.mongodb.net/whiteboard?retryWrites=true&w=majority
+   ```
+   Save this — you'll paste it as `MONGO_URI` in Railway.
+
+---
+
+## Step 2 — Push code to GitHub
 
 ```bash
-git init
+git init          # if not already a git repo
 git add .
 git commit -m "initial commit"
 ```
 
-Go to https://github.com/new → create a new repo, then:
+Create a repo at https://github.com/new, then:
 
 ```bash
 git remote add origin https://github.com/YOUR_USERNAME/collabboard.git
@@ -29,145 +38,120 @@ git push -u origin main
 
 ---
 
-## Step 2 — MongoDB Atlas (database)
-
-1. Go to https://cloud.mongodb.com → **Sign up free**
-2. Create a **free M0 cluster** (choose any region)
-3. **Database Access** → Add user: username `collabboard`, strong password — note it down
-4. **Network Access** → Add IP address `0.0.0.0/0` (allows Railway to connect)
-5. **Connect** → **Drivers** → copy the connection string:
-   ```
-   mongodb+srv://collabboard:<password>@cluster0.xxxxx.mongodb.net/whiteboard?retryWrites=true&w=majority
-   ```
-   Replace `<password>` with your actual password. **Save this string.**
-
----
-
 ## Step 3 — Deploy Backend to Railway
 
-1. Go to https://railway.app → **Login with GitHub**
-2. **New Project** → **Deploy from GitHub repo** → select your repo
-3. When asked for a **Root Directory**, type: `server`
-4. Railway detects Node.js automatically. Click **Deploy**
-5. Once deployed, go to **Variables** tab and add ALL of these:
+1. Go to https://railway.app → **Sign in with GitHub**
+2. Click **New Project** → **Deploy from GitHub repo**
+3. Select your repo → set **Root Directory** to `server`
+4. Railway will auto-detect Node.js. Under **Settings → Build Command**:
+   ```
+   npm install && npm run build
+   ```
+   And **Start Command**:
+   ```
+   node dist/index.js
+   ```
+5. Go to **Variables** tab and add:
 
-   | Variable | Value |
-   |----------|-------|
+   | Key | Value |
+   |-----|-------|
    | `NODE_ENV` | `production` |
    | `PORT` | `4000` |
-   | `MONGO_URI` | *(paste from Step 2)* |
-   | `JWT_SECRET` | *(any 64-char random string — use [this generator](https://generate-secret.vercel.app/64))* |
-   | `JWT_REFRESH_SECRET` | *(another 64-char random string — different from above)* |
+   | `MONGO_URI` | *(paste from Step 1)* |
+   | `JWT_SECRET` | *(any long random string, e.g. 64 chars)* |
+   | `JWT_REFRESH_SECRET` | *(another long random string)* |
    | `JWT_EXPIRES_IN` | `15m` |
    | `JWT_REFRESH_EXPIRES_IN` | `7d` |
    | `CLIENT_URL` | *(leave blank for now — fill in after Step 4)* |
-   | `ADMIN_SECRET` | *(any password you choose — used to access the admin panel)* |
+   | `REDIS_URL` | *(leave blank — Redis is optional, server works without it)* |
 
-6. Go to **Settings** → **Networking** → **Generate Domain**
-   Your backend URL will look like:
+6. Railway will deploy. Once done, click the **domain** link — it looks like:
    ```
    https://collabboard-server-production.up.railway.app
    ```
-   **Copy this URL — you need it in Steps 4 and 5.**
+   **Copy this URL** — you need it in the next steps.
 
-7. Test it works by opening this in your browser:
+7. Test it:
    ```
    https://YOUR_RAILWAY_URL/api/health
    ```
-   You should see: `{"status":"ok","timestamp":"..."}`
+   Should return `{"status":"ok", ...}`
 
 ---
 
-## Step 4 — Configure the frontend for production
-
-Open `client/vercel.json` and replace **both** occurrences of:
-```
-https://REPLACE_WITH_YOUR_RAILWAY_URL
-```
-with your actual Railway URL from Step 3, for example:
-```json
-{
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://collabboard-server-production.up.railway.app/api/:path*"
-    },
-    {
-      "source": "/socket.io/:path*",
-      "destination": "https://collabboard-server-production.up.railway.app/socket.io/:path*"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
-}
-```
-
-Commit and push this change:
-```bash
-git add client/vercel.json
-git commit -m "set railway url in vercel rewrites"
-git push
-```
-
----
-
-## Step 5 — Deploy Frontend to Vercel
+## Step 4 — Deploy Frontend to Vercel
 
 1. Go to https://vercel.com → **Sign in with GitHub**
-2. **Add New → Project** → import your repo
-3. Vercel will auto-detect the root `vercel.json`. **Do not change any settings.**
-4. Under **Environment Variables**, add:
+2. Click **Add New → Project** → import your repo
+3. Set **Root Directory** to `client`
+4. **Framework Preset**: Vite (auto-detected)
+5. Under **Environment Variables** add:
 
-   | Variable | Value |
-   |----------|-------|
-   | `VITE_SOCKET_URL` | *(your Railway URL from Step 3, e.g. `https://collabboard-server-production.up.railway.app`)* |
+   | Key | Value |
+   |-----|-------|
+   | `VITE_SOCKET_URL` | `https://YOUR_RAILWAY_URL` *(from Step 3)* |
 
-5. Click **Deploy**. Vercel builds and goes live in ~2 minutes.
-6. Your live URL will be something like:
+   > `VITE_API_URL` is NOT needed — `client/vercel.json` already proxies `/api` to Railway.
+
+6. **Before clicking Deploy**, open `client/vercel.json` and replace the placeholder:
+   ```json
+   "destination": "https://REPLACE_WITH_YOUR_RAILWAY_URL/api/:path*"
+   ```
+   with your actual Railway URL:
+   ```json
+   "destination": "https://collabboard-server-production.up.railway.app/api/:path*"
+   ```
+   Commit and push this change first.
+
+7. Click **Deploy**. Vercel builds and deploys in ~2 minutes.
+8. Your live URL will be something like:
    ```
    https://collabboard.vercel.app
    ```
-   **Copy this URL.**
 
 ---
 
-## Step 6 — Update CORS on Railway
+## Step 5 — Update CORS on Railway
 
-Go back to Railway → your server service → **Variables** and update:
+Now that you have your Vercel URL, go back to Railway → Variables and update:
 
-| Variable | Value |
-|----------|-------|
-| `CLIENT_URL` | *(your Vercel URL from Step 5, e.g. `https://collabboard.vercel.app`)* |
+| Key | Value |
+|-----|-------|
+| `CLIENT_URL` | `https://collabboard.vercel.app` |
 
-> ⚠️ No trailing slash. Must match exactly.
-
-Railway redeploys automatically (~30 seconds).
+Railway redeploys automatically.
 
 ---
 
-## Step 7 — Verify everything works ✅
+## Step 6 — Verify
 
-Open your Vercel URL:
+Open your Vercel URL in a browser:
 
-1. ✅ Landing page loads
-2. ✅ Click **Sign Up** → choose **User** → register an account
+1. ✅ The role-selector landing page loads
+2. ✅ Register a new account
 3. ✅ Create a room and open the whiteboard
-4. ✅ Open the same URL in a second browser tab — both cursors appear in real time
-5. ✅ Draw something — it syncs instantly between tabs
-6. ✅ Click **Sign In** → choose **Admin** → enter your `ADMIN_SECRET` → admin panel loads
-7. ✅ On the **Users** tab, click **Export Excel** → `.xlsx` file downloads
+4. ✅ Open in a second browser tab — both cursors should appear in real-time
+5. ✅ Draw something — it syncs instantly
 
 ---
 
-## Summary
+## Summary of all URLs
 
-| Thing | URL |
-|-------|-----|
-| **Live app** | `https://collabboard.vercel.app` *(your Vercel URL)* |
-| **API health check** | `https://YOUR_RAILWAY_URL/api/health` |
-| **Admin panel** | `https://collabboard.vercel.app/admin` |
+| Service | URL |
+|---------|-----|
+| **Live app** | `https://collabboard.vercel.app` |
+| **API health** | `https://YOUR_RAILWAY_URL/api/health` |
+| **MongoDB** | Atlas dashboard |
+
+---
+
+## Optional: Add Redis on Railway
+
+For multi-instance Socket.IO scaling (not needed for a single Railway instance):
+
+1. In Railway project → **New** → **Redis**
+2. Copy the `REDIS_URL` from the Redis service Variables
+3. Paste it as `REDIS_URL` in your server service Variables
 
 ---
 
@@ -175,19 +159,8 @@ Open your Vercel URL:
 
 | Problem | Fix |
 |---------|-----|
-| Blank screen / white page | Check `VITE_SOCKET_URL` is set on Vercel (no trailing slash) |
+| Blank screen after login | Check `VITE_SOCKET_URL` env var on Vercel |
 | 401 errors in network tab | Check `JWT_SECRET` is set on Railway |
-| CORS errors in console | `CLIENT_URL` on Railway must match your Vercel URL exactly |
-| Socket not connecting | `VITE_SOCKET_URL` must point to Railway, not Vercel |
-| MongoDB connection error | Atlas Network Access must allow `0.0.0.0/0` |
-| Admin panel says "invalid secret" | Enter the same value you set as `ADMIN_SECRET` on Railway |
-
----
-
-## Optional: Add Redis (for multi-instance scaling)
-
-Not needed for a single Railway instance. If you ever scale to multiple instances:
-
-1. Railway project → **New** → **Redis**
-2. Copy the `REDIS_URL` from the Redis service Variables
-3. Paste it as `REDIS_URL` in your server service Variables
+| CORS errors | Check `CLIENT_URL` on Railway matches your Vercel URL exactly (no trailing slash) |
+| Socket not connecting | Ensure `VITE_SOCKET_URL` points to Railway, not Vercel |
+| MongoDB connection refused | Check Atlas IP whitelist includes `0.0.0.0/0` |

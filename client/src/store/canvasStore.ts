@@ -44,8 +44,9 @@ interface CanvasState {
   stickyColor: string;
 
   // table defaults
-  tableRows: number;
-  tableCols: number;
+  tableRows:    number;
+  tableCols:    number;
+  tableHeaders: string[];
 
   // history state
   canUndo: boolean;
@@ -68,6 +69,7 @@ interface CanvasState {
   setStickyColor:  (c: string) => void;
   setTableRows:    (r: number) => void;
   setTableCols:    (c: number) => void;
+  setTableHeaders: (h: string[]) => void;
   setCanUndo:      (v: boolean) => void;
   setCanRedo:      (v: boolean) => void;
 }
@@ -89,8 +91,9 @@ export const useCanvasStore = create<CanvasState>((set) => ({
   textLang:    'en',
 
   stickyColor: '#fef08a',
-  tableRows: 3,
-  tableCols: 3,
+  tableRows:    3,
+  tableCols:    3,
+  tableHeaders: ['Column 1', 'Column 2', 'Column 3'],
 
   canUndo: false,
   canRedo: false,
@@ -111,6 +114,7 @@ export const useCanvasStore = create<CanvasState>((set) => ({
   setStickyColor:  (stickyColor) => set({ stickyColor }),
   setTableRows:    (tableRows)   => set({ tableRows }),
   setTableCols:    (tableCols)   => set({ tableCols }),
+  setTableHeaders: (tableHeaders) => set({ tableHeaders }),
   setCanUndo:     (canUndo)     => set({ canUndo }),
   setCanRedo:     (canRedo)     => set({ canRedo }),
 }));

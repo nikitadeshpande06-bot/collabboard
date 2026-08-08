@@ -47,7 +47,7 @@ export default function LoginPage() {
         )}
         <p className="text-sm text-gray-500 mb-6">
           Don't have an account?{' '}
-          <Link to={isAdmin ? '/register?role=admin' : '/register'} className="text-blue-600 hover:underline">Register</Link>
+          <Link to="/register" className="text-blue-600 hover:underline">Register</Link>
           {' · '}
           <Link to="/" className="text-gray-400 hover:underline">← Back</Link>
         </p>

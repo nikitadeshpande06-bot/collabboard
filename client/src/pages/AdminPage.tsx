@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import * as XLSX from 'xlsx';
 import api from '@/services/api';
 import { useAuthStore } from '@/store/authStore';
 import { getSocket } from '@/services/socket';
@@ -35,56 +34,6 @@ interface AdminStats {
   totalRooms: number;
   totalVersions: number;
   onlineNow: number;
-}
-
-// ── Excel export helpers ───────────────────────────────────────────────────────
-function exportUsersToExcel(data: AdminUser[]) {
-  const rows = data.map((u) => ({
-    Name:       u.name,
-    Email:      u.email,
-    Boards:     u.roomCount,
-    Status:     u.isOnline ? 'Online' : 'Offline',
-    'Joined':   new Date(u.createdAt).toLocaleDateString(),
-    'Last Room': u.lastRoom ?? '—',
-    'User ID':  u._id,
-  }));
-
-  const ws = XLSX.utils.json_to_sheet(rows);
-  // Auto-fit column widths
-  ws['!cols'] = [
-    { wch: 22 }, { wch: 30 }, { wch: 8 }, { wch: 10 },
-    { wch: 14 }, { wch: 26 }, { wch: 26 },
-  ];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Users');
-  XLSX.writeFile(wb, `collabboard-users-${datestamp()}.xlsx`);
-}
-
-function exportRoomsToExcel(data: AdminRoom[]) {
-  const rows = data.map((r) => ({
-    'Board Name': r.name,
-    Owner:        r.createdBy?.name ?? '—',
-    'Owner Email':r.createdBy?.email ?? '—',
-    Members:      r.members.length,
-    Versions:     r.versionCount,
-    'Online Now': r.onlineCount,
-    Visibility:   r.isPublic ? 'Public' : 'Private',
-    'Last Updated': new Date(r.updatedAt).toLocaleDateString(),
-    'Board ID':   r._id,
-  }));
-
-  const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [
-    { wch: 24 }, { wch: 20 }, { wch: 28 }, { wch: 10 },
-    { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 16 }, { wch: 26 },
-  ];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Boards');
-  XLSX.writeFile(wb, `collabboard-boards-${datestamp()}.xlsx`);
-}
-
-function datestamp() {
-  return new Date().toISOString().slice(0, 10);
 }
 
 // Admin secret — stored in localStorage so you don't retype it every visit
@@ -255,21 +204,7 @@ export default function AdminPage() {
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
               <h2 className="font-semibold">All Users ({users.data?.length ?? '…'})</h2>
-              <div className="flex items-center gap-2">
-                {users.data && users.data.length > 0 && (
-                  <button
-                    className="flex items-center gap-1.5 text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors"
-                    onClick={() => exportUsersToExcel(users.data!)}
-                    title="Download as Excel spreadsheet"
-                  >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
-                    Export Excel
-                  </button>
-                )}
-                <button className="text-xs text-blue-600" onClick={() => users.refetch()}>↻ Refresh</button>
-              </div>
+              <button className="text-xs text-blue-600" onClick={() => users.refetch()}>↻ Refresh</button>
             </div>
             {users.isLoading ? (
               <p className="text-center text-gray-400 py-10 text-sm">Loading…</p>
@@ -426,21 +361,7 @@ export default function AdminPage() {
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
               <h2 className="font-semibold">All Boards ({rooms.data?.length ?? '…'})</h2>
-              <div className="flex items-center gap-2">
-                {rooms.data && rooms.data.length > 0 && (
-                  <button
-                    className="flex items-center gap-1.5 text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors"
-                    onClick={() => exportRoomsToExcel(rooms.data!)}
-                    title="Download as Excel spreadsheet"
-                  >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
-                    Export Excel
-                  </button>
-                )}
-                <button className="text-xs text-blue-600" onClick={() => rooms.refetch()}>↻ Refresh</button>
-              </div>
+              <button className="text-xs text-blue-600" onClick={() => rooms.refetch()}>↻ Refresh</button>
             </div>
             {rooms.isLoading ? (
               <p className="text-center text-gray-400 py-10 text-sm">Loading…</p>

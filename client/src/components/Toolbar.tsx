@@ -520,8 +520,10 @@ export default function Toolbar({ undo, redo, clear, insertImage }: Props) {
               <TablePicker
                 rows={store.tableRows}
                 cols={store.tableCols}
+                headers={store.tableHeaders}
                 setRows={store.setTableRows}
                 setCols={store.setTableCols}
+                setHeaders={store.setTableHeaders}
                 onInsert={() => { pick('table'); }}
               />
             </div>
@@ -690,15 +692,29 @@ function ColorGrid({
 }
 
 function TablePicker({
-  rows, cols, setRows, setCols, onInsert,
+  rows, cols, headers, setRows, setCols, setHeaders, onInsert,
 }: {
-  rows: number; cols: number;
+  rows: number; cols: number; headers: string[];
   setRows: (r: number) => void;
   setCols: (c: number) => void;
+  setHeaders: (h: string[]) => void;
   onInsert: () => void;
 }) {
   const [hover, setHover] = useState({ r: rows, c: cols });
   const MAX = 8;
+
+  // Keep headers array in sync when cols changes
+  function handleColsChange(newCols: number) {
+    setCols(newCols);
+    const next = Array.from({ length: newCols }, (_, i) => headers[i] ?? `Column ${i + 1}`);
+    setHeaders(next);
+  }
+
+  function handleHeaderChange(i: number, value: string) {
+    const next = [...headers];
+    next[i] = value;
+    setHeaders(next);
+  }
 
   return (
     <div>
@@ -716,7 +732,7 @@ function TablePicker({
                   filled ? 'bg-blue-400 border-blue-500' : 'bg-gray-100 border-gray-200 hover:bg-gray-200'
                 }`}
                 onMouseEnter={() => setHover({ r, c })}
-                onClick={() => { setRows(hover.r); setCols(hover.c); }}
+                onClick={() => { setRows(hover.r); handleColsChange(hover.c); }}
               />
             );
           })}
@@ -726,7 +742,7 @@ function TablePicker({
         </p>
       </div>
 
-      {/* Manual input */}
+      {/* Manual row/col inputs */}
       <div className="flex gap-2 items-center mb-3">
         <div className="flex-1">
           <label className="text-[10px] text-gray-400 uppercase tracking-wide">Rows</label>
@@ -738,8 +754,31 @@ function TablePicker({
           <label className="text-[10px] text-gray-400 uppercase tracking-wide">Cols</label>
           <input type="number" min={1} max={20} value={cols}
             className="w-full border border-gray-200 rounded-lg px-2 py-1 text-sm"
-            onChange={(e) => setCols(Math.max(1, parseInt(e.target.value) || 1))} />
+            onChange={(e) => handleColsChange(Math.max(1, parseInt(e.target.value) || 1))} />
         </div>
+      </div>
+
+      {/* Editable header labels */}
+      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1.5">
+        Header labels
+      </p>
+      <div className="space-y-1.5 mb-3">
+        {Array.from({ length: cols }, (_, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <span
+              className="flex-shrink-0 w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold text-white"
+              style={{ background: '#3b82f6' }}
+            >
+              {i + 1}
+            </span>
+            <input
+              className="flex-1 border border-gray-200 rounded-md px-2 py-0.5 text-xs text-gray-800 outline-none focus:ring-2 focus:ring-blue-400"
+              value={headers[i] ?? `Column ${i + 1}`}
+              placeholder={`Column ${i + 1}`}
+              onChange={(e) => handleHeaderChange(i, e.target.value)}
+            />
+          </div>
+        ))}
       </div>
 
       <button

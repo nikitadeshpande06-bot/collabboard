@@ -110,15 +110,7 @@ export class CanvasEngine {
 
     this.bindFabricEvents();
     this.bindResizeHandler(container);
-
-    // Always start in select mode so the pencil doesn't ghost-drag immediately
-    // after sign-in (the store may still hold 'pencil' from a previous session).
-    useCanvasStore.getState().setTool('select');
-    this.applyTool('select');
-
-    // Cancel any lingering Fabric drawing state when the mouse is released
-    // anywhere in the window (handles sign-in click → canvas navigation edge case).
-    window.addEventListener('mouseup', this._onWindowMouseUp);
+    this.applyTool(useCanvasStore.getState().activeTool);
   }
 
   // ── Public API ──────────────────────────────────────────────────────────────
@@ -128,9 +120,6 @@ export class CanvasEngine {
       this.fc.loadFromJSON(JSON.parse(json), () => {
         this.fc.renderAll();
         this.snapshotHistory();
-        // Re-apply the current tool so object selectability / drawing mode
-        // is consistent after the canvas is replaced (fixes templates).
-        this.applyTool(useCanvasStore.getState().activeTool);
         resolve();
       });
     });
@@ -333,7 +322,7 @@ export class CanvasEngine {
     const cellW = 90;
     const cellH = 36;
     const objects: fabric.Object[] = [];
-    const { strokeColor } = useCanvasStore.getState();
+    const { strokeColor, tableHeaders } = useCanvasStore.getState();
 
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
@@ -350,7 +339,7 @@ export class CanvasEngine {
         });
 
         const label = isHeader
-          ? `Header ${c + 1}`
+          ? (tableHeaders[c] ?? `Column ${c + 1}`)
           : `Row ${r}, Col ${c + 1}`;
 
         const text = new fabric.IText(label, {
@@ -591,19 +580,7 @@ export class CanvasEngine {
     useCanvasStore.getState().setCanUndo(true);
   }
 
-  destroy(): void {
-    this.fc.dispose();
-    window.removeEventListener('mouseup', this._onWindowMouseUp);
-  }
-
-  // Bound window-level mouseup so Fabric's internal drawing state is cancelled
-  // when the button was pressed outside the canvas (e.g. after a sign-in click).
-  private _onWindowMouseUp = () => {
-    if (this.fc.isDrawingMode && (this.fc as any)._isCurrentlyDrawing) {
-      (this.fc as any)._isCurrentlyDrawing = false;
-      this.fc.renderAll();
-    }
-  };
+  destroy(): void { this.fc.dispose(); }
 
   // ── Private helpers ─────────────────────────────────────────────────────────
 

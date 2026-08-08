@@ -5,147 +5,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// ── Role picker modal ─────────────────────────────────────────────────────────
-
-type AuthAction = 'login' | 'register';
-
-function RolePickerModal({
-  action,
-  onClose,
-  onPick,
-  dark,
-  card,
-  border,
-  text,
-  muted,
-  accent,
-}: {
-  action: AuthAction;
-  onClose: () => void;
-  onPick: (role: 'user' | 'admin') => void;
-  dark: boolean;
-  card: string;
-  border: string;
-  text: string;
-  muted: string;
-  accent: string;
-}) {
-  const title    = action === 'login' ? 'Sign in as…' : 'Sign up as…';
-  const userDesc = action === 'login' ? 'Access your boards and collaborate with your team.' : 'Create a free account and start collaborating.';
-  const adminDesc= action === 'login' ? 'Access the admin dashboard to manage users and rooms.' : 'Register with admin privileges to manage the platform.';
-
-  return (
-    /* backdrop */
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed', inset: 0, zIndex: 200,
-        background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          background: card, border: `1px solid ${border}`, borderRadius: 20,
-          padding: '36px 32px', maxWidth: 420, width: '100%',
-          boxShadow: '0 24px 64px rgba(0,0,0,0.35)',
-        }}
-      >
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: text, marginBottom: 8, letterSpacing: '-0.4px' }}>
-          {title}
-        </h2>
-        <p style={{ fontSize: 14, color: muted, marginBottom: 28, lineHeight: 1.6 }}>
-          Choose how you want to continue.
-        </p>
-
-        {/* User card */}
-        <RoleCard
-          icon="👤"
-          title="User"
-          desc={userDesc}
-          onClick={() => onPick('user')}
-          accent={accent}
-          border={border}
-          text={text}
-          muted={muted}
-          dark={dark}
-        />
-
-        <div style={{ height: 12 }} />
-
-        {/* Admin card */}
-        <RoleCard
-          icon="🛡️"
-          title="Admin"
-          desc={adminDesc}
-          onClick={() => onPick('admin')}
-          accent="#f59e0b"
-          border={border}
-          text={text}
-          muted={muted}
-          dark={dark}
-          adminStyle
-        />
-
-        <button
-          onClick={onClose}
-          style={{ marginTop: 20, width: '100%', background: 'none', border: 'none', color: muted, fontSize: 13, cursor: 'pointer', padding: '6px 0' }}
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function RoleCard({
-  icon, title, desc, onClick, accent, border, text, muted, adminStyle = false,
-}: {
-  icon: string; title: string; desc: string; onClick: () => void;
-  accent: string; border: string; text: string; muted: string;
-  dark: boolean; adminStyle?: boolean;
-}) {
-  const [hov, setHov] = useState(false);
-  return (
-    <button
-      onClick={onClick}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
-      style={{
-        display: 'flex', alignItems: 'flex-start', gap: 16, width: '100%', textAlign: 'left',
-        background: hov ? (adminStyle ? 'rgba(245,158,11,0.07)' : 'rgba(79,110,247,0.07)') : 'transparent',
-        border: `1.5px solid ${hov ? accent : border}`,
-        borderRadius: 14, padding: '16px 18px', cursor: 'pointer',
-        transition: 'border-color 0.15s, background 0.15s',
-      }}
-    >
-      <span style={{ fontSize: 28, lineHeight: 1, marginTop: 2 }}>{icon}</span>
-      <div>
-        <p style={{ fontWeight: 700, fontSize: 15, color: text, marginBottom: 4 }}>{title}</p>
-        <p style={{ fontSize: 13, color: muted, lineHeight: 1.55, margin: 0 }}>{desc}</p>
-      </div>
-      <span style={{ marginLeft: 'auto', fontSize: 18, color: hov ? accent : muted, alignSelf: 'center' }}>→</span>
-    </button>
-  );
-}
-
-// ── Page ──────────────────────────────────────────────────────────────────────
-
 export default function RoleSelectorPage() {
   const navigate = useNavigate();
   const [dark, setDark] = useState(true);
-
-  // Role picker modal state
-  const [pickerAction, setPickerAction] = useState<AuthAction | null>(null);
-  const openPicker = (action: AuthAction) => setPickerAction(action);
-  const closePicker = () => setPickerAction(null);
-  const handleRolePick = (role: 'user' | 'admin') => {
-    closePicker();
-    const param = role === 'admin' ? '?role=admin' : '';
-    if (pickerAction === 'login')    navigate(`/login${param}`);
-    else                             navigate(`/register${param}`);
-  };
 
   const bg     = dark ? '#0f1117' : '#f8fafc';
   const card   = dark ? '#161b27' : '#ffffff';
@@ -157,16 +19,6 @@ export default function RoleSelectorPage() {
 
   return (
     <div style={{ fontFamily: '-apple-system,"Segoe UI",system-ui,sans-serif', background: bg, color: text, minHeight: '100vh', overflowX: 'hidden' }}>
-
-      {/* ── Role picker modal ────────────────────────────────────────────── */}
-      {pickerAction && (
-        <RolePickerModal
-          action={pickerAction}
-          onClose={closePicker}
-          onPick={handleRolePick}
-          dark={dark} card={card} border={border} text={text} muted={muted} accent={accent}
-        />
-      )}
 
       {/* ── Navbar ──────────────────────────────────────────────────────── */}
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, background: dark ? 'rgba(15,17,23,0.85)' : 'rgba(255,255,255,0.85)', backdropFilter: 'blur(12px)', borderBottom: `1px solid ${border}` }}>
@@ -211,7 +63,7 @@ export default function RoleSelectorPage() {
               {dark ? '☀️' : '🌙'}
             </button>
             <button
-              onClick={() => openPicker('login')}
+              onClick={() => navigate('/login')}
               style={{ fontSize: 14, fontWeight: 500, color: text, background: 'none', border: `1px solid ${border}`, borderRadius: 8, padding: '8px 18px', cursor: 'pointer', transition: 'border-color 0.15s' }}
               onMouseEnter={(e) => (e.currentTarget.style.borderColor = accent)}
               onMouseLeave={(e) => (e.currentTarget.style.borderColor = border)}
@@ -219,7 +71,7 @@ export default function RoleSelectorPage() {
               Sign In
             </button>
             <button
-              onClick={() => openPicker('register')}
+              onClick={() => navigate('/register')}
               style={{ fontSize: 14, fontWeight: 600, color: '#fff', background: accent, border: 'none', borderRadius: 8, padding: '8px 18px', cursor: 'pointer', transition: 'background 0.15s' }}
               onMouseEnter={(e) => (e.currentTarget.style.background = accentHover)}
               onMouseLeave={(e) => (e.currentTarget.style.background = accent)}
@@ -261,7 +113,7 @@ export default function RoleSelectorPage() {
 
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
             <button
-              onClick={() => openPicker('register')}
+              onClick={() => navigate('/register')}
               style={{ fontSize: 16, fontWeight: 700, color: '#fff', background: accent, border: 'none', borderRadius: 10, padding: '14px 36px', cursor: 'pointer', transition: 'background 0.15s, transform 0.1s', boxShadow: '0 4px 24px rgba(79,110,247,0.35)' }}
               onMouseEnter={(e) => { e.currentTarget.style.background = accentHover; e.currentTarget.style.transform = 'translateY(-1px)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = accent; e.currentTarget.style.transform = 'translateY(0)'; }}
@@ -269,7 +121,7 @@ export default function RoleSelectorPage() {
               Get started →
             </button>
             <button
-              onClick={() => openPicker('login')}
+              onClick={() => navigate('/login')}
               style={{ fontSize: 16, fontWeight: 600, color: text, background: 'none', border: `1px solid ${border}`, borderRadius: 10, padding: '14px 36px', cursor: 'pointer', transition: 'border-color 0.15s' }}
               onMouseEnter={(e) => (e.currentTarget.style.borderColor = accent)}
               onMouseLeave={(e) => (e.currentTarget.style.borderColor = border)}
@@ -338,7 +190,7 @@ export default function RoleSelectorPage() {
               Pencil, shapes, sticky notes, text, laser pointer, voice-to-text, comment pins, PDF export, playback recorder and more — all in one canvas.
             </p>
             <button
-              onClick={() => openPicker('register')}
+              onClick={() => navigate('/register')}
               style={{ fontSize: 15, fontWeight: 700, color: '#fff', background: accent, border: 'none', borderRadius: 10, padding: '12px 28px', cursor: 'pointer' }}
               onMouseEnter={(e) => (e.currentTarget.style.background = accentHover)}
               onMouseLeave={(e) => (e.currentTarget.style.background = accent)}
@@ -369,20 +221,20 @@ export default function RoleSelectorPage() {
           </p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
             <button
-              onClick={() => openPicker('register')}
+              onClick={() => navigate('/register')}
               style={{ fontSize: 16, fontWeight: 700, color: '#fff', background: accent, border: 'none', borderRadius: 10, padding: '14px 36px', cursor: 'pointer', boxShadow: '0 4px 24px rgba(79,110,247,0.35)' }}
               onMouseEnter={(e) => (e.currentTarget.style.background = accentHover)}
               onMouseLeave={(e) => (e.currentTarget.style.background = accent)}
             >
-              Get started free
+              Create free account
             </button>
             <button
-              onClick={() => openPicker('login')}
+              onClick={() => navigate('/login?role=admin')}
               style={{ fontSize: 16, fontWeight: 600, color: text, background: 'none', border: `1px solid ${border}`, borderRadius: 10, padding: '14px 36px', cursor: 'pointer' }}
               onMouseEnter={(e) => (e.currentTarget.style.borderColor = accent)}
               onMouseLeave={(e) => (e.currentTarget.style.borderColor = border)}
             >
-              Sign in
+              🛡️ Admin access
             </button>
           </div>
         </div>

@@ -924,3 +924,38 @@
 2026-08-08 12:01:27 [[34mdebug[39m]: Socket connected: W3XobTDWwBTcETCjAAAB (user 6a733a34268aa5f0135b62b3)
 2026-08-08 12:01:27 [[34mdebug[39m]: User 6a733a34268aa5f0135b62b3 joined room 6a75e8f0072d3d4cbb042b5a
 2026-08-08 12:04:11 [[34mdebug[39m]: Socket disconnected: W3XobTDWwBTcETCjAAAB (transport close)
+2026-08-08 15:56:11 [[32minfo[39m]: ✅ Google OAuth strategy registered
+2026-08-08 15:56:11 [[32minfo[39m]: ✅ GitHub OAuth strategy registered
+2026-08-08 15:56:13 [[32minfo[39m]: ✅ MongoDB connected
+2026-08-08 15:56:13 [[33mwarn[39m]: ⚠️  Redis unavailable — running without it (single-instance mode)
+2026-08-08 15:56:13 [[33mwarn[39m]: ⚠️  Socket.IO Redis adapter unavailable — using in-memory (single-instance only)
+2026-08-08 15:56:13 [[32minfo[39m]: 🚀 Server running on http://localhost:4000
+2026-08-08 16:12:16 [[32minfo[39m]: ✅ Google OAuth strategy registered
+2026-08-08 16:12:16 [[32minfo[39m]: ✅ GitHub OAuth strategy registered
+2026-08-08 16:12:17 [[32minfo[39m]: ✅ MongoDB connected
+2026-08-08 16:12:17 [[33mwarn[39m]: ⚠️  Redis unavailable — running without it (single-instance mode)
+2026-08-08 16:12:17 [[33mwarn[39m]: ⚠️  Socket.IO Redis adapter unavailable — using in-memory (single-instance only)
+2026-08-08 16:12:17 [[32minfo[39m]: 🚀 Server running on http://localhost:4000
+2026-08-08 16:12:48 [[34mdebug[39m]: Socket connected: Nugfj5YZkKrANO0hAAAB (user 6a733a34268aa5f0135b62b3)
+2026-08-08 16:12:48 [[34mdebug[39m]: User 6a733a34268aa5f0135b62b3 joined room 6a733a96268aa5f0135b62bc
+2026-08-08 16:13:01 [[34mdebug[39m]: Socket disconnected: Nugfj5YZkKrANO0hAAAB (transport close)
+2026-08-08 16:13:01 [[34mdebug[39m]: Socket connected: MxJZqvu8uLPvCy3JAAAD (user 6a733a34268aa5f0135b62b3)
+2026-08-08 16:13:01 [[34mdebug[39m]: User 6a733a34268aa5f0135b62b3 joined room 6a733a96268aa5f0135b62bc
+2026-08-08 16:17:16 [[34mdebug[39m]: User 6a733a34268aa5f0135b62b3 joined room 6a733a96268aa5f0135b62bc
+2026-08-08 18:15:56 [[32minfo[39m]: ✅ Google OAuth strategy registered
+2026-08-08 18:15:56 [[32minfo[39m]: ✅ GitHub OAuth strategy registered
+2026-08-08 18:15:58 [[32minfo[39m]: ✅ MongoDB connected
+2026-08-08 18:15:58 [[33mwarn[39m]: ⚠️  Redis unavailable — running without it (single-instance mode)
+2026-08-08 18:15:58 [[33mwarn[39m]: ⚠️  Socket.IO Redis adapter unavailable — using in-memory (single-instance only)
+2026-08-08 18:15:58 [[32minfo[39m]: 🚀 Server running on http://localhost:4000
+2026-08-08 18:46:48 [[32minfo[39m]: ✅ Google OAuth strategy registered
+2026-08-08 18:46:48 [[32minfo[39m]: ✅ GitHub OAuth strategy registered
+2026-08-08 18:46:49 [[32minfo[39m]: ✅ MongoDB connected
+2026-08-08 18:46:49 [[33mwarn[39m]: ⚠️  Redis unavailable — running without it (single-instance mode)
+2026-08-08 18:46:49 [[33mwarn[39m]: ⚠️  Socket.IO Redis adapter unavailable — using in-memory (single-instance only)
+2026-08-08 18:46:49 [[32minfo[39m]: 🚀 Server running on http://localhost:4000
+2026-08-08 18:47:06 [[32minfo[39m]: ✅ Google OAuth strategy registered
+2026-08-08 18:47:06 [[32minfo[39m]: ✅ GitHub OAuth strategy registered
+2026-08-08 18:47:07 [[32minfo[39m]: ✅ MongoDB connected
+2026-08-08 18:47:07 [[33mwarn[39m]: ⚠️  Redis unavailable — running without it (single-instance mode)
+2026-08-08 18:47:07 [[33mwarn[39m]: ⚠️  Socket.IO Redis adapter unavailable — using in-memory (single-instance only)

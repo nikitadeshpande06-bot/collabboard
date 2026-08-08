@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import api from '@/services/api';
@@ -10,11 +10,8 @@ const oauthBase = API.replace('/api', '');
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { setTokens, setUser } = useAuthStore();
   const [form, setForm] = useState({ name: '', email: '', password: '' });
-
-  const isAdmin = searchParams.get('role') === 'admin';
 
   const mutation = useMutation({
     mutationFn: () => api.post('/auth/register', form).then((r) => r.data),
@@ -22,7 +19,7 @@ export default function RegisterPage() {
       setTokens(data.accessToken, data.refreshToken);
       setUser(data.user);
       toast.success('Account created!');
-      navigate(isAdmin ? '/admin' : '/dashboard');
+      navigate('/dashboard');
     },
     onError: (err: any) => toast.error(err?.response?.data?.message ?? 'Registration failed'),
   });
@@ -31,17 +28,10 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white p-4">
       <div className="w-full max-w-md bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
         {/* Header */}
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">
-          {isAdmin ? '🛡️ Admin Registration' : 'Create account'}
-        </h1>
-        {isAdmin && (
-          <div className="mb-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-            You are registering as <strong>Admin</strong>. You'll be redirected to the admin dashboard.
-          </div>
-        )}
+        <h1 className="text-2xl font-bold text-gray-900 mb-1">Create account</h1>
         <p className="text-sm text-gray-500 mb-6">
           Already registered?{' '}
-          <Link to={isAdmin ? '/login?role=admin' : '/login'} className="text-blue-600 hover:underline">Sign in</Link>
+          <Link to="/login" className="text-blue-600 hover:underline">Sign in</Link>
           {' · '}
           <Link to="/" className="text-gray-400 hover:underline">← Back</Link>
         </p>
