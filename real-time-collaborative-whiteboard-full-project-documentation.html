@@ -1,0 +1,607 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CollabBoard — Project Documentation</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.65;background:#ffffff;color:#1f2328}
+  .page{max-width:780px;margin:0 auto;padding:40px 24px 80px}
+  h1{font-size:26px;font-weight:700;margin-bottom:4px;color:#1f2328}
+  .subtitle{color:#57606a;font-size:14px;margin-bottom:32px}
+  h2{font-size:18px;font-weight:700;margin:36px 0 12px;padding-bottom:6px;border-bottom:2px solid #e5e7eb;color:#1f2328}
+  h3{font-size:14px;font-weight:600;margin:20px 0 8px;color:#1f2328}
+  p{margin-bottom:10px;color:#1f2328}
+  ul,ol{padding-left:20px;margin-bottom:10px}
+  li{margin-bottom:4px}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+  th{background:#f7f8fa;text-align:left;padding:8px 10px;border:1px solid #e5e7eb;font-weight:600;color:#1f2328}
+  td{padding:7px 10px;border:1px solid #e5e7eb;vertical-align:top;color:#1f2328}
+  tr:nth-child(even) td{background:#fafafa}
+  code{font-family:"SF Mono","Consolas",monospace;font-size:12px;background:#f7f8fa;border:1px solid #e5e7eb;padding:1px 5px;border-radius:4px;color:#1f2328}
+  pre{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:12px;line-height:1.6;margin:10px 0;color:#1f2328}
+  .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+  .badge-blue{background:#dbeafe;color:#1d4ed8}
+  .badge-green{background:#dcfce7;color:#166534}
+  .badge-amber{background:#fef3c7;color:#92400e}
+  .badge-purple{background:#f3e8ff;color:#6b21a8}
+  .badge-red{background:#fee2e2;color:#991b1b}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:12px 0}
+  .card{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:10px;padding:14px}
+  .card h4{font-size:13px;font-weight:600;margin-bottom:6px}
+  .toc a{color:#3b82d4;text-decoration:none}
+  .toc a:hover{text-decoration:underline}
+  .toc li{margin:3px 0}
+  svg text{font-family:-apple-system,"Segoe UI",system-ui,sans-serif}
+  .sprint{border-left:3px solid #3b82d4;padding:8px 14px;margin:8px 0;background:#eff6ff;border-radius:0 8px 8px 0}
+  .sprint strong{color:#1d4ed8}
+  .qa-item{border:1px solid #e5e7eb;border-radius:8px;margin:8px 0;overflow:hidden}
+  .qa-q{background:#f7f8fa;padding:10px 14px;font-weight:600;font-size:13px}
+  .qa-a{padding:10px 14px;font-size:13px;color:#1f2328}
+  footer{margin-top:60px;padding-top:16px;border-top:1px solid #e5e7eb;text-align:center;color:#57606a;font-size:12px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>🖌️ CollabBoard</h1>
+<p class="subtitle">Real-Time Collaborative Whiteboard with Offline Support &amp; Versioning — Complete Project Documentation</p>
+
+
+<div class="card" style="margin-bottom:24px">
+  <h4>Table of Contents</h4>
+  <ol class="toc" style="columns:2;gap:24px">
+    <li><a href="#srs">Software Requirements Specification</a></li>
+    <li><a href="#stack">Technology Stack</a></li>
+    <li><a href="#arch">System Architecture</a></li>
+    <li><a href="#er">ER Diagram</a></li>
+    <li><a href="#schema">Database Schema</a></li>
+    <li><a href="#api">API Summary</a></li>
+    <li><a href="#offline">Offline Sync Algorithm</a></li>
+    <li><a href="#version">Version Control Algorithm</a></li>
+    <li><a href="#conflict">Conflict Resolution Strategy</a></li>
+    <li><a href="#folders">Folder Structure</a></li>
+    <li><a href="#sprint">Sprint Plan (8 weeks)</a></li>
+    <li><a href="#deploy">Deployment Guide</a></li>
+    <li><a href="#viva">Viva Q&amp;A</a></li>
+    <li><a href="#resume">Resume Description</a></li>
+    <li><a href="#future">Future Scope</a></li>
+  </ol>
+</div>
+
+
+<h2 id="srs">1. Software Requirements Specification (SRS)</h2>
+<h3>Problem Statement</h3>
+<p>Remote teams lack a unified, real-time canvas for visual collaboration. Existing tools are either too expensive, don't work offline, or provide no version history. CollabBoard solves this with an open-source, self-hostable solution.</p>
+
+<h3>Objectives</h3>
+<ul>
+  <li>Enable simultaneous multi-user drawing with sub-100ms latency</li>
+  <li>Support offline editing with automatic reconnect &amp; merge</li>
+  <li>Provide full version history with restore capability</li>
+  <li>Implement role-based access control (Owner / Editor / Viewer)</li>
+  <li>Deliver a responsive, accessible UI</li>
+</ul>
+
+<h3>Functional Requirements</h3>
+<table>
+  <tr><th>#</th><th>Requirement</th><th>Priority</th></tr>
+  <tr><td>FR1</td><td>User registration, login, JWT authentication</td><td><span class="badge badge-red">Must</span></td></tr>
+  <tr><td>FR2</td><td>Create / join / delete rooms</td><td><span class="badge badge-red">Must</span></td></tr>
+  <tr><td>FR3</td><td>Real-time drawing sync via WebSockets</td><td><span class="badge badge-red">Must</span></td></tr>
+  <tr><td>FR4</td><td>Tools: Pencil, Shapes, Text, Sticky, Eraser, Pan/Zoom</td><td><span class="badge badge-red">Must</span></td></tr>
+  <tr><td>FR5</td><td>Offline queue with IndexedDB; auto-sync on reconnect</td><td><span class="badge badge-red">Must</span></td></tr>
+  <tr><td>FR6</td><td>Version snapshots: save, browse, restore</td><td><span class="badge badge-blue">Should</span></td></tr>
+  <tr><td>FR7</td><td>Invite link for rooms</td><td><span class="badge badge-blue">Should</span></td></tr>
+  <tr><td>FR8</td><td>Live cursor tracking</td><td><span class="badge badge-amber">Could</span></td></tr>
+  <tr><td>FR9</td><td>Image upload to canvas</td><td><span class="badge badge-amber">Could</span></td></tr>
+</table>
+
+<h3>Non-Functional Requirements</h3>
+<table>
+  <tr><th>Category</th><th>Target</th></tr>
+  <tr><td>Performance</td><td>Draw op broadcast &lt; 100 ms on LAN; canvas load &lt; 2 s</td></tr>
+  <tr><td>Scalability</td><td>Stateless backend + Redis pub/sub; horizontal scaling ready</td></tr>
+  <tr><td>Availability</td><td>99.5% uptime; graceful degradation offline</td></tr>
+  <tr><td>Security</td><td>JWT auth, bcrypt, helmet, rate-limiting, input validation</td></tr>
+  <tr><td>Maintainability</td><td>TypeScript throughout, lint, unit + integration tests</td></tr>
+</table>
+
+<h3>User Stories</h3>
+<table>
+  <tr><th>As a…</th><th>I want to…</th><th>So that…</th></tr>
+  <tr><td>New user</td><td>Register and log in</td><td>I can access my boards securely</td></tr>
+  <tr><td>Owner</td><td>Create a room and invite teammates</td><td>We can collaborate on a shared canvas</td></tr>
+  <tr><td>Editor</td><td>Draw even when my internet drops</td><td>I don't lose my work</td></tr>
+  <tr><td>Viewer</td><td>See all changes in real-time</td><td>I stay informed without edit access</td></tr>
+  <tr><td>Owner</td><td>Restore a previous version</td><td>I can undo accidental bulk deletions</td></tr>
+</table>
+
+
+<h2 id="stack">2. Technology Stack</h2>
+<div class="grid2">
+  <div class="card">
+    <h4>Frontend</h4>
+    <ul>
+      <li>React 18 + TypeScript</li>
+      <li>Tailwind CSS 3</li>
+      <li>Fabric.js 5 (canvas engine)</li>
+      <li>Zustand (global state)</li>
+      <li>React Query v5 (server state)</li>
+      <li>Socket.IO Client 4</li>
+      <li>idb (IndexedDB wrapper)</li>
+      <li>Vite 5 (bundler)</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Backend</h4>
+    <ul>
+      <li>Node.js 20 + TypeScript</li>
+      <li>Express.js 4</li>
+      <li>Socket.IO 4 (WebSocket)</li>
+      <li>MongoDB 7 + Mongoose 8</li>
+      <li>Redis 7 (pub/sub adapter)</li>
+      <li>JWT (access + refresh tokens)</li>
+      <li>bcryptjs, helmet, winston</li>
+      <li>Jest + Supertest (tests)</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>DevOps</h4>
+    <ul>
+      <li>Docker + Docker Compose</li>
+      <li>GitHub Actions CI/CD</li>
+      <li>nginx (static file serving)</li>
+      <li>GHCR (container registry)</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Deployment</h4>
+    <ul>
+      <li>Frontend → Vercel (or Netlify)</li>
+      <li>Backend → Render (or Railway)</li>
+      <li>DB → MongoDB Atlas (free tier)</li>
+      <li>Cache → Upstash Redis (free tier)</li>
+    </ul>
+  </div>
+</div>
+
+
+<h2 id="arch">3. System Architecture</h2>
+<svg width="100%" style="border:1px solid #e5e7eb;border-radius:8px;background:#fafafa">
+  
+  <rect x="20" y="130" width="120" height="80" rx="8" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"></rect>
+  <text x="80" y="160" text-anchor="middle" font-size="12" font-weight="600" fill="#1d4ed8">Browser</text>
+  <text x="80" y="178" text-anchor="middle" font-size="10" fill="#1d4ed8">React + Fabric.js</text>
+  <text x="80" y="194" text-anchor="middle" font-size="10" fill="#1d4ed8">IndexedDB Queue</text>
+
+  
+  <line x1="140" y1="170" x2="195" y2="170" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"></line>
+  <text x="168" y="162" font-size="9" fill="#57606a">HTTP/WS</text>
+
+  
+  <rect x="200" y="130" width="100" height="80" rx="8" fill="#dcfce7" stroke="#86efac" stroke-width="1.5"></rect>
+  <text x="250" y="160" text-anchor="middle" font-size="12" font-weight="600" fill="#166534">nginx</text>
+  <text x="250" y="178" text-anchor="middle" font-size="10" fill="#166534">Reverse Proxy</text>
+  <text x="250" y="194" text-anchor="middle" font-size="10" fill="#166534">Static Files</text>
+
+  
+  <line x1="300" y1="170" x2="355" y2="170" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"></line>
+
+  
+  <rect x="360" y="110" width="120" height="120" rx="8" fill="#f3e8ff" stroke="#d8b4fe" stroke-width="1.5"></rect>
+  <text x="420" y="140" text-anchor="middle" font-size="12" font-weight="600" fill="#6b21a8">Node.js</text>
+  <text x="420" y="158" text-anchor="middle" font-size="10" fill="#6b21a8">Express API</text>
+  <text x="420" y="174" text-anchor="middle" font-size="10" fill="#6b21a8">Socket.IO</text>
+  <text x="420" y="190" text-anchor="middle" font-size="10" fill="#6b21a8">Auth / RBAC</text>
+  <text x="420" y="206" text-anchor="middle" font-size="10" fill="#6b21a8">Versioning</text>
+
+  
+  <line x1="480" y1="145" x2="545" y2="105" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"></line>
+  
+  <line x1="480" y1="195" x2="545" y2="235" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"></line>
+
+  
+  <rect x="550" y="60" width="120" height="70" rx="8" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.5"></rect>
+  <text x="610" y="88" text-anchor="middle" font-size="12" font-weight="600" fill="#92400e">MongoDB</text>
+  <text x="610" y="106" text-anchor="middle" font-size="10" fill="#92400e">Users, Rooms</text>
+  <text x="610" y="120" text-anchor="middle" font-size="10" fill="#92400e">Versions</text>
+
+  
+  <rect x="550" y="210" width="120" height="70" rx="8" fill="#fee2e2" stroke="#fca5a5" stroke-width="1.5"></rect>
+  <text x="610" y="238" text-anchor="middle" font-size="12" font-weight="600" fill="#991b1b">Redis</text>
+  <text x="610" y="256" text-anchor="middle" font-size="10" fill="#991b1b">Pub/Sub Adapter</text>
+  <text x="610" y="270" text-anchor="middle" font-size="10" fill="#991b1b">Op counters</text>
+
+  
+  <rect x="360" y="270" width="120" height="50" rx="8" fill="#f3e8ff" stroke="#d8b4fe" stroke-width="1.5"></rect>
+  <text x="420" y="295" text-anchor="middle" font-size="10" fill="#6b21a8">Node.js (replica)</text>
+  <text x="420" y="310" text-anchor="middle" font-size="9" fill="#6b21a8">horizontal scaling</text>
+  <line x1="480" y1="295" x2="548" y2="265" stroke="#94a3b8" stroke-width="1" marker-end="url(#arr)"></line>
+
+  
+  <rect x="20" y="20" width="120" height="50" rx="8" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.5"></rect>
+  <text x="80" y="43" text-anchor="middle" font-size="11" font-weight="600" fill="#92400e">Offline Mode</text>
+  <text x="80" y="60" text-anchor="middle" font-size="10" fill="#92400e">IndexedDB Queue</text>
+  <line x1="80" y1="70" x2="80" y2="128" stroke="#fcd34d" stroke-width="1.5" marker-end="url(#arr)"></line>
+
+  <defs>
+    <marker id="arr">
+      <polygon points="0 0,8 3,0 6" fill="#94a3b8"></polygon>
+    </marker>
+  </defs>
+</svg>
+
+<p style="font-size:12px;color:#57606a;margin-top:6px">A second Node.js instance (dashed) can be added for horizontal scaling — both share the same Redis pub/sub channel via Socket.IO Redis Adapter.</p>
+
+
+<h2 id="er">4. ER Diagram</h2>
+<svg width="100%" style="border:1px solid #e5e7eb;border-radius:8px;background:#fafafa">
+  
+  <rect x="20" y="80" width="140" height="140" rx="8" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"></rect>
+  <rect x="20" y="80" width="140" height="28" rx="8" fill="#93c5fd"></rect>
+  <text x="90" y="99" text-anchor="middle" font-size="12" font-weight="700" fill="#1d4ed8">User</text>
+  <text x="30" y="125" font-size="11" fill="#1f2328">_id (PK)</text>
+  <text x="30" y="143" font-size="11" fill="#1f2328">name</text>
+  <text x="30" y="161" font-size="11" fill="#1f2328">email (unique)</text>
+  <text x="30" y="179" font-size="11" fill="#1f2328">password (hashed)</text>
+  <text x="30" y="197" font-size="11" fill="#1f2328">avatar</text>
+  <text x="30" y="215" font-size="11" fill="#57606a">timestamps</text>
+
+  
+  <rect x="260" y="40" width="160" height="200" rx="8" fill="#dcfce7" stroke="#86efac" stroke-width="1.5"></rect>
+  <rect x="260" y="40" width="160" height="28" rx="8" fill="#86efac"></rect>
+  <text x="340" y="59" text-anchor="middle" font-size="12" font-weight="700" fill="#166534">Room</text>
+  <text x="270" y="85" font-size="11" fill="#1f2328">_id (PK)</text>
+  <text x="270" y="103" font-size="11" fill="#1f2328">name</text>
+  <text x="270" y="121" font-size="11" fill="#1f2328">description</text>
+  <text x="270" y="139" font-size="11" fill="#1f2328">canvasData (JSON)</text>
+  <text x="270" y="157" font-size="11" fill="#1f2328">inviteToken (unique)</text>
+  <text x="270" y="175" font-size="11" fill="#1f2328">isPublic</text>
+  <text x="270" y="193" font-size="11" fill="#1f2328">createdBy (FK→User)</text>
+  <text x="270" y="211" font-size="11" fill="#57606a">timestamps</text>
+  <text x="270" y="229" font-size="11" fill="#57606a">members[ ]</text>
+
+  
+  <rect x="260" y="255" width="160" height="38" rx="6" fill="#f0fdf4" stroke="#86efac" stroke-width="1"></rect>
+  <text x="340" y="272" text-anchor="middle" font-size="10" font-weight="600" fill="#166534">RoomMember (embedded)</text>
+  <text x="270" y="287" font-size="10" fill="#1f2328">user(FK) · role · joinedAt</text>
+
+  
+  <rect x="510" y="60" width="150" height="170" rx="8" fill="#f3e8ff" stroke="#d8b4fe" stroke-width="1.5"></rect>
+  <rect x="510" y="60" width="150" height="28" rx="8" fill="#d8b4fe"></rect>
+  <text x="585" y="79" text-anchor="middle" font-size="12" font-weight="700" fill="#6b21a8">Version</text>
+  <text x="520" y="105" font-size="11" fill="#1f2328">_id (PK)</text>
+  <text x="520" y="123" font-size="11" fill="#1f2328">room (FK→Room)</text>
+  <text x="520" y="141" font-size="11" fill="#1f2328">createdBy (FK→User)</text>
+  <text x="520" y="159" font-size="11" fill="#1f2328">canvasData</text>
+  <text x="520" y="177" font-size="11" fill="#1f2328">label</text>
+  <text x="520" y="195" font-size="11" fill="#1f2328">versionNumber</text>
+  <text x="520" y="213" font-size="11" fill="#57606a">createdAt</text>
+
+  
+  
+  <line x1="160" y1="120" x2="258" y2="120" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr2)"></line>
+  <text x="195" y="113" font-size="9" fill="#57606a">1 creates N</text>
+
+  
+  <line x1="420" y1="120" x2="508" y2="120" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr2)"></line>
+  <text x="442" y="113" font-size="9" fill="#57606a">1 has N</text>
+
+  
+  <line x1="90" y1="220" x2="258" y2="265" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr2)"></line>
+  <text x="130" y="255" font-size="9" fill="#57606a">M:N via members</text>
+
+  <defs>
+    <marker id="arr2">
+      <polygon points="0 0,8 3,0 6" fill="#94a3b8"></polygon>
+    </marker>
+  </defs>
+</svg>
+
+
+<h2 id="schema">5. Database Schema (MongoDB)</h2>
+<div class="grid3">
+  <div class="card">
+    <h4>users</h4>
+    <pre>_id       ObjectId
+name      String (80)
+email     String unique
+password  String (bcrypt)
+avatar    String?
+createdAt Date
+updatedAt Date</pre>
+  </div>
+  <div class="card">
+    <h4>rooms</h4>
+    <pre>_id         ObjectId
+name        String (100)
+description String?
+canvasData  String (JSON)
+members     [{
+  user     ObjectId ref User
+  role     enum (owner|editor|viewer)
+  joinedAt Date
+}]
+inviteToken String unique
+isPublic    Boolean
+createdBy   ObjectId ref User
+createdAt   Date
+updatedAt   Date</pre>
+  </div>
+  <div class="card">
+    <h4>versions</h4>
+    <pre>_id           ObjectId
+room          ObjectId ref Room
+createdBy     ObjectId ref User
+canvasData    String (JSON)
+label         String
+versionNumber Number
+createdAt     Date</pre>
+  </div>
+</div>
+
+
+<h2 id="api">6. REST API Summary</h2>
+<table>
+  <tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th></tr>
+  <tr><td><span class="badge badge-green">POST</span></td><td><code>/api/auth/register</code></td><td>—</td><td>Create account</td></tr>
+  <tr><td><span class="badge badge-green">POST</span></td><td><code>/api/auth/login</code></td><td>—</td><td>Login, get tokens</td></tr>
+  <tr><td><span class="badge badge-green">POST</span></td><td><code>/api/auth/refresh</code></td><td>—</td><td>Refresh access token</td></tr>
+  <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/users/me</code></td><td>JWT</td><td>Get profile</td></tr>
+  <tr><td><span class="badge badge-amber">PATCH</span></td><td><code>/api/users/me</code></td><td>JWT</td><td>Update profile</td></tr>
+  <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/rooms</code></td><td>JWT</td><td>List my rooms</td></tr>
+  <tr><td><span class="badge badge-green">POST</span></td><td><code>/api/rooms</code></td><td>JWT</td><td>Create room</td></tr>
+  <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/rooms/:id</code></td><td>JWT</td><td>Room details</td></tr>
+  <tr><td><span class="badge badge-amber">PATCH</span></td><td><code>/api/rooms/:id/canvas</code></td><td>editor+</td><td>Save canvas</td></tr>
+  <tr><td><span class="badge badge-green">POST</span></td><td><code>/api/rooms/join/:token</code></td><td>JWT</td><td>Join via invite</td></tr>
+  <tr><td><span class="badge badge-red">DELETE</span></td><td><code>/api/rooms/:id</code></td><td>owner</td><td>Delete room</td></tr>
+  <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/versions/:roomId</code></td><td>viewer+</td><td>List versions</td></tr>
+  <tr><td><span class="badge badge-green">POST</span></td><td><code>/api/versions/:roomId</code></td><td>editor+</td><td>Create snapshot</td></tr>
+  <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/versions/:roomId/:vId</code></td><td>viewer+</td><td>Get snapshot</td></tr>
+  <tr><td><span class="badge badge-green">POST</span></td><td><code>/api/versions/:roomId/:vId/restore</code></td><td>editor+</td><td>Restore version</td></tr>
+</table>
+
+
+<h2 id="offline">7. Offline Synchronisation Algorithm</h2>
+<div class="card">
+  <h4>How It Works</h4>
+  <ol>
+    <li><strong>Detection:</strong> <code>navigator.onLine</code> + window <code>online/offline</code> events monitored by <code>useNetworkStatus</code> hook.</li>
+    <li><strong>Queuing:</strong> When offline, every <code>DrawOperation</code> is stored in IndexedDB (<em>whiteboard_offline</em> DB, <em>pending_ops</em> store) with a <code>queuedAt</code> timestamp.</li>
+    <li><strong>Reconnect detection:</strong> <code>useOfflineSync</code> hook listens for the browser's <code>online</code> event.</li>
+    <li><strong>Replay:</strong> Pending ops are sorted by <code>queuedAt</code> ascending, then re-emitted through Socket.IO with a 30 ms delay between each to avoid flooding.</li>
+    <li><strong>Cleanup:</strong> Each op is deleted from IndexedDB immediately after successful emission.</li>
+    <li><strong>Conflict resolution:</strong> Last-write-wins via timestamp. Vector clocks track causality across sessions.</li>
+  </ol>
+</div>
+<pre>
+OFFLINE QUEUE FLOW
+─────────────────
+User draws → isOnline?
+    YES → emitDrawOperation(socket)
+    NO  → enqueueOperation(IndexedDB)
+
+browser fires 'online' event
+→ getPendingOperations() [sorted by queuedAt ASC]
+→ for each op:
+    socket.emit('draw:operation', op)
+    await 30ms
+    removeOperation(op.id)
+→ log "Sync complete"
+</pre>
+
+
+<h2 id="version">8. Versioning Algorithm</h2>
+<div class="card">
+  <h4>Snapshot Strategy</h4>
+  <ul>
+    <li><strong>Manual save:</strong> User clicks "Save now" in VersionPanel → POST <code>/api/versions/:roomId</code> with full Fabric.js JSON + label.</li>
+    <li><strong>Auto-save trigger:</strong> Server counts ops per room in Redis. Every 30 ops, the frontend owner is signalled to push the full canvas.</li>
+    <li><strong>Undo/Redo:</strong> Client-side only — a circular buffer of JSON snapshots (max 50 entries, O(1) push/pop).</li>
+    <li><strong>Restore:</strong> POST <code>/api/versions/:roomId/:vId/restore</code> — server replaces <code>room.canvasData</code> and emits a <code>room:canvas_saved</code> event so all connected clients reload.</li>
+    <li><strong>Version numbering:</strong> Sequential integer per room, determined atomically by querying MAX(versionNumber) before insert.</li>
+  </ul>
+</div>
+
+
+<h2 id="conflict">9. Conflict Resolution Strategy</h2>
+<table>
+  <tr><th>Scenario</th><th>Strategy</th></tr>
+  <tr><td>Two users move the same object simultaneously</td><td><strong>Last-Write-Wins (LWW)</strong> based on <code>op.timestamp</code>. The op with the higher timestamp wins and overwrites the object state.</td></tr>
+  <tr><td>User A deletes, User B modifies the same object</td><td>Delete wins. The <code>modify</code> op is silently dropped if the target object no longer exists.</td></tr>
+  <tr><td>Offline user's ops conflict with online changes</td><td>Offline ops are replayed in order after reconnect. Since they carry the original timestamps, the server's LWW rule naturally positions them. For major conflicts a "restore" can be used.</td></tr>
+  <tr><td>Causality tracking</td><td>Every op includes a <strong>Vector Clock</strong> <code>{userId: lamportClock}</code>. The receiving client takes the element-wise max when applying remote ops, ensuring happens-before relationships are preserved.</td></tr>
+</table>
+
+
+<h2 id="folders">10. Folder Structure</h2>
+<div class="grid2">
+  <div class="card">
+    <h4>client/src/</h4>
+    <pre>App.tsx            ← router root
+main.tsx           ← React entry
+config.ts          ← env vars
+index.css          ← Tailwind base
+canvas/
+  CanvasEngine.ts  ← Fabric.js engine
+components/
+  Toolbar.tsx
+  VersionPanel.tsx
+  UserList.tsx
+  OfflineBadge.tsx
+hooks/
+  useWhiteboardCanvas.ts
+  useOfflineSync.ts
+  useNetworkStatus.ts
+offline/
+  queue.ts         ← IndexedDB helpers
+pages/
+  LoginPage.tsx
+  RegisterPage.tsx
+  DashboardPage.tsx
+  WhiteboardPage.tsx
+  JoinRoomPage.tsx
+services/
+  api.ts           ← Axios + refresh logic
+  socket.ts        ← Socket.IO helpers
+store/
+  authStore.ts
+  canvasStore.ts
+  roomStore.ts
+types/
+  index.ts</pre>
+  </div>
+  <div class="card">
+    <h4>server/src/</h4>
+    <pre>index.ts           ← Express + boot
+config/
+  database.ts      ← Mongoose connect
+  redis.ts         ← ioredis connect
+controllers/
+  auth.controller.ts
+  room.controller.ts
+  user.controller.ts
+  version.controller.ts
+middleware/
+  auth.middleware.ts
+  role.middleware.ts
+  validate.middleware.ts
+models/
+  User.ts
+  Room.ts
+  Version.ts
+routes/
+  auth.routes.ts
+  room.routes.ts
+  user.routes.ts
+  version.routes.ts
+socket/
+  index.ts         ← Socket.IO server
+tests/
+  auth.test.ts
+  room.test.ts
+utils/
+  logger.ts</pre>
+  </div>
+</div>
+
+
+<h2 id="sprint">11. Sprint Plan (8 Weeks)</h2>
+<div class="sprint"><strong>Week 1 — Foundation:</strong> Project scaffold, Docker Compose, MongoDB + Redis setup, JWT auth (register/login/refresh), basic CI pipeline.</div>
+<div class="sprint"><strong>Week 2 — Rooms &amp; RBAC:</strong> Room CRUD, invite tokens, role middleware (Owner/Editor/Viewer), room listing UI, dashboard page.</div>
+<div class="sprint"><strong>Week 3 — Canvas Engine:</strong> Fabric.js integration, tool system (pencil, shapes, text, eraser, pan/zoom), undo/redo history buffer.</div>
+<div class="sprint"><strong>Week 4 — Real-Time Sync:</strong> Socket.IO server, join/leave room events, draw operation broadcasting, cursor tracking, Redis adapter.</div>
+<div class="sprint"><strong>Week 5 — Offline Support:</strong> IndexedDB queue, useNetworkStatus hook, useOfflineSync auto-replay on reconnect, offline badge UI.</div>
+<div class="sprint"><strong>Week 6 — Version History:</strong> Version snapshots API, VersionPanel UI (browse/restore), auto-save trigger via Redis op counter.</div>
+<div class="sprint"><strong>Week 7 — Polish &amp; Testing:</strong> Integration tests (auth, rooms), responsive UI fixes, performance profiling, error boundaries, rate-limiting.</div>
+<div class="sprint"><strong>Week 8 — Deployment:</strong> Dockerfiles + nginx, GitHub Actions CI/CD, deploy to Vercel + Render + Atlas, final README, demo recording.</div>
+
+
+<h2 id="deploy">12. Deployment Guide</h2>
+<h3>Local Development</h3>
+<pre>git clone https://github.com/your-username/realtime-whiteboard
+cd realtime-whiteboard
+cp server/.env.example server/.env      # fill in secrets
+docker-compose up --build               # starts mongo, redis, server, client</pre>
+
+<h3>Production (Vercel + Render)</h3>
+<table>
+  <tr><th>Service</th><th>Provider</th><th>Config</th></tr>
+  <tr><td>Frontend</td><td>Vercel</td><td>Root: <code>client/</code> · Build: <code>npm run build</code> · Output: <code>dist/</code></td></tr>
+  <tr><td>Backend</td><td>Render</td><td>Dockerfile: <code>server/Dockerfile</code> · Port: 4000 · Set env vars from <code>.env.example</code></td></tr>
+  <tr><td>Database</td><td>MongoDB Atlas</td><td>Free M0 cluster · Copy connection string to <code>MONGO_URI</code></td></tr>
+  <tr><td>Cache</td><td>Upstash Redis</td><td>Free tier · Copy REST URL to <code>REDIS_URL</code></td></tr>
+</table>
+
+<h3>Required Environment Variables (server)</h3>
+<table>
+  <tr><th>Variable</th><th>Example</th></tr>
+  <tr><td><code>MONGO_URI</code></td><td>mongodb+srv://user:pass@cluster.mongodb.net/whiteboard</td></tr>
+  <tr><td><code>REDIS_URL</code></td><td>redis://:password@host:6379</td></tr>
+  <tr><td><code>JWT_SECRET</code></td><td>long random string (≥32 chars)</td></tr>
+  <tr><td><code>JWT_REFRESH_SECRET</code></td><td>different long random string</td></tr>
+  <tr><td><code>CLIENT_URL</code></td><td>https://your-app.vercel.app</td></tr>
+</table>
+
+
+<h2 id="viva">13. Viva Q&amp;A</h2>
+
+<div class="qa-item">
+  <div class="qa-q">Q1: Why did you choose WebSockets over HTTP polling?</div>
+  <div class="qa-a">WebSockets maintain a persistent, full-duplex TCP connection, giving sub-100ms latency for drawing operations. HTTP polling introduces 1–2 s delays and wastes bandwidth. Socket.IO adds reconnection logic, rooms, and namespaces on top of raw WebSockets.</div>
+</div>
+<div class="qa-item">
+  <div class="qa-q">Q2: How does your offline sync avoid data loss?</div>
+  <div class="qa-a">Every drawing operation is written to IndexedDB atomically before being emitted to the socket. On reconnect the client reads the queue in chronological order and replays each op. If the socket disconnects mid-replay, the remaining ops are still in the queue and will be retried next time.</div>
+</div>
+<div class="qa-item">
+  <div class="qa-q">Q3: What is a vector clock and why use it?</div>
+  <div class="qa-a">A vector clock is a map of {userId → lamport counter} that tracks causality across distributed nodes. Unlike wall-clock timestamps (which can skew), vector clocks tell us definitively whether event A happened-before event B, or whether they are concurrent. We use them to make conflict decisions more accurate than pure timestamp comparison.</div>
+</div>
+<div class="qa-item">
+  <div class="qa-q">Q4: How does role-based access control work?</div>
+  <div class="qa-a">The <code>requireRoomRole</code> middleware reads the room document from MongoDB, finds the calling user in <code>room.members</code>, and checks their role rank (owner=3, editor=2, viewer=1) against the required minimum. This is enforced on every mutating API route and on the socket (only editors can emit draw operations).</div>
+</div>
+<div class="qa-item">
+  <div class="qa-q">Q5: Why Redis? Can the app run without it?</div>
+  <div class="qa-a">Redis serves two purposes: (1) Socket.IO Redis Adapter broadcasts events across multiple Node.js instances for horizontal scaling; (2) a per-room op counter triggers auto-saves. If Redis is unavailable the code falls back gracefully — Socket.IO uses in-memory adapter (single-instance only) and auto-saves are skipped.</div>
+</div>
+<div class="qa-item">
+  <div class="qa-q">Q6: What is Fabric.js and why not a raw Canvas API?</div>
+  <div class="qa-a">Fabric.js is an OOP wrapper over the HTML5 Canvas API. It provides object model (each shape is a JS object with properties), selection handles, serialisation to/from JSON, free-drawing brushes, and event hooks (object:added, object:modified). This serialisation is essential for broadcasting and storing operations.</div>
+</div>
+<div class="qa-item">
+  <div class="qa-q">Q7: How do you prevent password exposure in API responses?</div>
+  <div class="qa-a">The Mongoose schema sets <code>select: false</code> on the password field, so it's excluded from all queries by default. Additionally the <code>toJSON</code> transform deletes the field before serialisation. The only time we explicitly <code>.select('+password')</code> is during login to run bcrypt comparison.</div>
+</div>
+<div class="qa-item">
+  <div class="qa-q">Q8: How would you scale this to 10,000 concurrent users?</div>
+  <div class="qa-a">Add more Node.js instances behind a load balancer — Socket.IO Redis Adapter already handles cross-instance event delivery. Use MongoDB Atlas sharding for the database tier. Move large canvasData blobs to S3/R2 and store only a URL in MongoDB. Add a CDN for static assets. Rate-limit per room to throttle cursor spam.</div>
+</div>
+
+
+<h2 id="resume">14. Resume Project Description</h2>
+<div class="card" style="background:#eff6ff;border-color:#bfdbfe">
+  <p><strong>Real-Time Collaborative Whiteboard</strong> | React · TypeScript · Node.js · Socket.IO · MongoDB · Redis | 2024</p>
+  <ul>
+    <li>Built a multi-user whiteboard SaaS enabling real-time drawing, shapes, text, and sticky notes with sub-100ms latency via Socket.IO WebSockets.</li>
+    <li>Implemented offline-first architecture: queued all drawing operations in IndexedDB during network loss; auto-replayed on reconnect with vector-clock-based conflict resolution.</li>
+    <li>Designed a complete version-history system — snapshot, browse, compare, restore — backed by MongoDB and triggered by a Redis operation counter.</li>
+    <li>Secured the app with JWT (access + refresh tokens), bcrypt, role-based access control (Owner/Editor/Viewer), helmet, and express-rate-limit.</li>
+    <li>Containerised with Docker Compose; shipped via GitHub Actions CI/CD pipeline (lint → test → build → push to GHCR → deploy on Render/Vercel).</li>
+  </ul>
+</div>
+
+
+<h2 id="future">15. Future Scope</h2>
+<div class="grid2">
+  <div class="card">
+    <h4>Near-term</h4>
+    <ul>
+      <li>Image upload via drag-and-drop (S3/R2)</li>
+      <li>PDF export of canvas</li>
+      <li>Emoji reactions on canvas objects</li>
+      <li>Private direct-message chat panel</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Long-term</h4>
+    <ul>
+      <li>AI drawing assistant (Stable Diffusion API)</li>
+      <li>Video/voice rooms via WebRTC</li>
+      <li>React Native mobile app</li>
+      <li>Template marketplace</li>
+      <li>Operational Transformation (OT) for true CRDT merging</li>
+    </ul>
+  </div>
+</div>
+
+<footer>
+  Made with IBM Bob
+</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,61 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: wb_mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+
+  redis:
+    image: redis:7-alpine
+    container_name: wb_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass redispassword
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: wb_server
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    depends_on:
+      - mongo
+      - redis
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      MONGO_URI: mongodb://root:rootpassword@mongo:27017/whiteboard?authSource=admin
+      REDIS_URL: redis://:redispassword@redis:6379
+      JWT_SECRET: supersecretjwtkey_changeinprod
+      JWT_REFRESH_SECRET: supersecretrefreshjwtkey_changeinprod
+      CLIENT_URL: http://localhost:5173
+    volumes:
+      - ./server/src:/app/src
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: wb_client
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+    environment:
+      VITE_API_URL: http://localhost:4000/api
+      VITE_SOCKET_URL: http://localhost:4000
+
+volumes:
+  mongo_data:

@@ -1,0 +1,33 @@
+2026-08-05 21:28:23 [[31merror[39m]: Error: Unknown authentication strategy "google"
+    at attempt (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\passport\lib\middleware\authenticate.js:193:39)
+    at authenticate (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\passport\lib\middleware\authenticate.js:379:7)
+    at Layer.handle [as handle_request] (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\index.js:280:10)
+    at router.handle (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\index.js:175:3)
+2026-08-05 21:28:36 [[31merror[39m]: Error: Unknown authentication strategy "google"
+    at attempt (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\passport\lib\middleware\authenticate.js:193:39)
+    at authenticate (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\passport\lib\middleware\authenticate.js:379:7)
+    at Layer.handle [as handle_request] (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\index.js:280:10)
+    at router.handle (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\index.js:175:3)
+2026-08-05 23:34:27 [[31merror[39m]: Error: Unknown authentication strategy "github"
+    at attempt (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\passport\lib\middleware\authenticate.js:193:39)
+    at authenticate (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\passport\lib\middleware\authenticate.js:379:7)
+    at Layer.handle [as handle_request] (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\index.js:280:10)
+    at router.handle (C:\Users\nikit\OneDrive\Documents\Realtime-whitboard-project\server\node_modules\express\lib\router\index.js:175:3)
