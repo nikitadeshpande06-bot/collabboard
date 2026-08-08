@@ -75,9 +75,13 @@ async function bootstrap() {
   });
 }
 
-bootstrap().catch((err) => {
-  logger.error('Bootstrap failed', err);
-  process.exit(1);
-});
+// Only boot the server when NOT running under Jest/test environment.
+// Tests import { app } directly and manage their own DB connection.
+if (process.env.NODE_ENV !== 'test') {
+  bootstrap().catch((err) => {
+    logger.error('Bootstrap failed', err);
+    process.exit(1);
+  });
+}
 
 export { app, httpServer };

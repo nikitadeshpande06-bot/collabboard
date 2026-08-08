@@ -2,6 +2,10 @@
   "buildCommand": "cd client && npm install && npm run build",
   "outputDirectory": "client/dist",
   "installCommand": "echo skip",
+  "env": {
+    "VITE_API_URL": "/api",
+    "VITE_SOCKET_URL": "https://collabboard-production-933a.up.railway.app"
+  },
   "rewrites": [
     {
       "source": "/api/:path*",

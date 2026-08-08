@@ -1,10 +1,8 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
-import { app } from '../../index';
+import { app } from '../index';
 import { User } from '../models/User';
-import { Room } from '../models/Room';
-import { v4 as uuidv4 } from 'uuid';
 
 let token: string;
 let userId: string;
