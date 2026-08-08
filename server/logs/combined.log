@@ -959,3 +959,8 @@
 2026-08-08 18:47:07 [[32minfo[39m]: ✅ MongoDB connected
 2026-08-08 18:47:07 [[33mwarn[39m]: ⚠️  Redis unavailable — running without it (single-instance mode)
 2026-08-08 18:47:07 [[33mwarn[39m]: ⚠️  Socket.IO Redis adapter unavailable — using in-memory (single-instance only)
+2026-08-08 19:53:49 [[32minfo[39m]: ✅ Google OAuth strategy registered
+2026-08-08 19:53:49 [[32minfo[39m]: ✅ GitHub OAuth strategy registered
+2026-08-08 19:53:52 [[32minfo[39m]: ✅ MongoDB connected
+2026-08-08 19:53:52 [[33mwarn[39m]: ⚠️  Redis unavailable — running without it (single-instance mode)
+2026-08-08 19:53:52 [[33mwarn[39m]: ⚠️  Socket.IO Redis adapter unavailable — using in-memory (single-instance only)
