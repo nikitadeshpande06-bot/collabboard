@@ -115,10 +115,13 @@ export class CanvasEngine {
 
   // ── Public API ──────────────────────────────────────────────────────────────
 
-  loadFromJSON(json: string): Promise<void> {
+  loadFromJSON(json: string, silent = false): Promise<void> {
     return new Promise((resolve) => {
+      const wasReplaying = this.isReplaying;
+      if (silent) this.isReplaying = true;
       this.fc.loadFromJSON(JSON.parse(json), () => {
         this.fc.renderAll();
+        if (silent) this.isReplaying = wasReplaying;
         this.snapshotHistory();
         resolve();
       });
@@ -156,7 +159,12 @@ export class CanvasEngine {
         canvas.freeDrawingBrush.width = strokeWidth * 5;
         break;
       }
+      case 'pan':
+        canvas.defaultCursor = 'grab';
+        canvas.forEachObject((o) => { o.selectable = false; o.evented = false; });
+        break;
       default:
+        canvas.defaultCursor = 'crosshair';
         canvas.forEachObject((o) => { o.selectable = false; o.evented = false; });
     }
     canvas.renderAll();
@@ -314,10 +322,16 @@ export class CanvasEngine {
     }
   }
 
-  /**
-   * Insert a table as a group of rect + IText cells.
-   * Each cell is independently editable via double-click.
-   */
+  /** Insert table at the canvas viewport center — called directly from the toolbar */
+  insertTableAtCenter(): void {
+    const vpt  = this.fc.viewportTransform ?? [1,0,0,1,0,0];
+    const zoom = this.fc.getZoom();
+    const cx   = (this.fc.getWidth()  / 2 - vpt[4]) / zoom;
+    const cy   = (this.fc.getHeight() / 2 - vpt[5]) / zoom;
+    const { tableRows, tableCols } = useCanvasStore.getState();
+    this.insertTable(cx - (tableCols * 90) / 2, cy - (tableRows * 36) / 2, tableRows, tableCols);
+  }
+
   insertTable(x: number, y: number, rows: number, cols: number): void {
     const cellW = 90;
     const cellH = 36;
@@ -420,6 +434,37 @@ export class CanvasEngine {
     obj.set(prop as Partial<fabric.IText>);
     this.fc.renderAll();
     this.emitModify(obj);
+    this.snapshotHistory();
+  }
+
+  /** Apply fill/stroke colour to the currently selected object(s) on the canvas */
+  applyFillToSelection(fill: string): void {
+    const active = this.fc.getActiveObject();
+    if (!active) return;
+    const applyOne = (o: fabric.Object) => {
+      o.set({ fill: fill === 'transparent' ? 'rgba(0,0,0,0)' : fill });
+    };
+    if ((active as fabric.ActiveSelection).getObjects) {
+      (active as fabric.ActiveSelection).getObjects().forEach(applyOne);
+    } else {
+      applyOne(active);
+    }
+    this.fc.renderAll();
+    this.emitModify(active);
+    this.snapshotHistory();
+  }
+
+  applyStrokeToSelection(stroke: string): void {
+    const active = this.fc.getActiveObject();
+    if (!active) return;
+    const applyOne = (o: fabric.Object) => { o.set({ stroke }); };
+    if ((active as fabric.ActiveSelection).getObjects) {
+      (active as fabric.ActiveSelection).getObjects().forEach(applyOne);
+    } else {
+      applyOne(active);
+    }
+    this.fc.renderAll();
+    this.emitModify(active);
     this.snapshotHistory();
   }
 
@@ -659,10 +704,12 @@ export class CanvasEngine {
 
     this.fc.on('mouse:down', (opt) => {
       const e = opt.e as MouseEvent;
-      // Middle-mouse pan
-      if (e.button === 1) {
+      const tool = useCanvasStore.getState().activeTool;
+      // Middle-mouse pan OR left-click while pan tool is active
+      if (e.button === 1 || tool === 'pan') {
         pan.isDragging = true;
         this.fc.selection = false;
+        if (tool === 'pan') this.fc.defaultCursor = 'grabbing';
         pan.lastPosX = e.clientX;
         pan.lastPosY = e.clientY;
       }
@@ -682,17 +729,22 @@ export class CanvasEngine {
 
     this.fc.on('mouse:up', (opt) => {
       const e = opt.e as MouseEvent;
+      const wasDragging = pan.isDragging;
       pan.isDragging = false;
-      this.fc.selection = useCanvasStore.getState().activeTool === 'select';
+      const tool = useCanvasStore.getState().activeTool;
+      if (tool === 'pan') this.fc.defaultCursor = 'grab';
+      this.fc.selection = tool === 'select';
 
       // ── SHAPE PLACEMENT ──────────────────────────────────────────────────────
       // For all non-draw, non-select, non-pan tools, place a shape on left-click.
-      const tool = useCanvasStore.getState().activeTool;
       const shapeTool = !['select','pencil','eraser','pan'].includes(tool);
-      if (shapeTool && e.button === 0 && !pan.isDragging) {
+      if (shapeTool && e.button === 0 && !wasDragging) {
         // Convert screen coords → canvas coords (accounting for zoom/pan)
         const pointer = this.fc.getPointer(e);
         this.addShape(tool, pointer.x, pointer.y);
+        // Auto-revert to select tool after placing a shape so repeated clicks
+        // don't keep placing new shapes.
+        useCanvasStore.getState().setTool('select');
       }
     });
 

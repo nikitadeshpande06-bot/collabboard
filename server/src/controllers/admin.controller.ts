@@ -4,6 +4,7 @@ import { User } from '../models/User';
 import { Room } from '../models/Room';
 import { Version } from '../models/Version';
 import { getOnlineUsers } from '../socket/onlineTracker';
+import bcrypt from 'bcryptjs';
 
 /**
  * GET /api/admin/stats
@@ -110,4 +111,75 @@ export async function deleteUser(req: AuthRequest, res: Response): Promise<void>
     Room.deleteMany({ createdBy: userId }),
   ]);
   res.json({ message: 'User deleted' });
+}
+
+/**
+ * POST /api/admin/users
+ * Create a new user account directly from the admin panel.
+ */
+export async function createUser(req: AuthRequest, res: Response): Promise<void> {
+  const { name, email, password } = req.body as {
+    name?: string;
+    email?: string;
+    password?: string;
+  };
+
+  if (!name?.trim() || !email?.trim() || !password) {
+    res.status(400).json({ message: 'name, email, and password are required' });
+    return;
+  }
+  if (password.length < 8) {
+    res.status(400).json({ message: 'Password must be at least 8 characters' });
+    return;
+  }
+
+  const exists = await User.findOne({ email: email.toLowerCase().trim() });
+  if (exists) {
+    res.status(409).json({ message: 'Email already registered' });
+    return;
+  }
+
+  const user = await User.create({
+    name: name.trim(),
+    email: email.toLowerCase().trim(),
+    password,
+  });
+
+  res.status(201).json({ message: 'User created', user });
+}
+
+/**
+ * PATCH /api/admin/users/:userId
+ * Update a user's name, email, and/or reset their password.
+ */
+export async function updateUser(req: AuthRequest, res: Response): Promise<void> {
+  const { userId } = req.params;
+  const { name, email, password } = req.body as {
+    name?: string;
+    email?: string;
+    password?: string;
+  };
+
+  const updates: Record<string, unknown> = {};
+  if (name?.trim())  updates.name  = name.trim();
+  if (email?.trim()) updates.email = email.toLowerCase().trim();
+
+  if (password) {
+    if (password.length < 8) {
+      res.status(400).json({ message: 'Password must be at least 8 characters' });
+      return;
+    }
+    const salt = await bcrypt.genSalt(12);
+    updates.password = await bcrypt.hash(password, salt);
+  }
+
+  if (Object.keys(updates).length === 0) {
+    res.status(400).json({ message: 'No fields to update' });
+    return;
+  }
+
+  const user = await User.findByIdAndUpdate(userId, updates, { new: true, runValidators: true });
+  if (!user) { res.status(404).json({ message: 'User not found' }); return; }
+
+  res.json({ message: 'User updated', user });
 }

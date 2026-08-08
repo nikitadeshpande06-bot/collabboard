@@ -2,10 +2,13 @@ import { useState, useRef, useEffect } from 'react';
 import { useCanvasStore, type Tool, type FontFamily, type TextAlign } from '@/store/canvasStore';
 
 interface Props {
-  undo:        () => void;
-  redo:        () => void;
-  clear:       () => void;
-  insertImage: () => void;
+  undo:                  () => void;
+  redo:                  () => void;
+  clear:                 () => void;
+  insertImage:           () => void;
+  insertTableAtCenter:   () => void;
+  applyFillToSelection:  (c: string) => void;
+  applyStrokeToSelection:(c: string) => void;
 }
 
 // ── Tool groups shown in the sidebar ─────────────────────────────────────────
@@ -116,7 +119,10 @@ export const LANGUAGES: {
 // ── Stroke widths ─────────────────────────────────────────────────────────────
 const WIDTHS = [1, 2, 4, 8];
 
-export default function Toolbar({ undo, redo, clear, insertImage }: Props) {
+export default function Toolbar({
+  undo, redo, clear, insertImage,
+  insertTableAtCenter, applyFillToSelection, applyStrokeToSelection,
+}: Props) {
   const store = useCanvasStore();
   const { activeTool, setTool } = store;
 
@@ -281,7 +287,7 @@ export default function Toolbar({ undo, redo, clear, insertImage }: Props) {
 
       {/* ── Flyout Panels ────────────────────────────────────────────────── */}
       {openPanel && (
-        <div className="absolute left-14 top-0 z-50 bg-white border border-gray-200 rounded-xl shadow-xl p-3 min-w-[220px]">
+        <div className="absolute left-14 top-0 z-50 bg-white border border-gray-200 rounded-xl shadow-xl p-3 min-w-[220px] max-h-[calc(100vh-80px)] overflow-y-auto">
 
           {/* SHAPES PANEL */}
           {openPanel === 'shapes' && (
@@ -524,7 +530,7 @@ export default function Toolbar({ undo, redo, clear, insertImage }: Props) {
                 setRows={store.setTableRows}
                 setCols={store.setTableCols}
                 setHeaders={store.setTableHeaders}
-                onInsert={() => { pick('table'); }}
+                onInsert={() => { insertTableAtCenter(); setOpenPanel(null); }}
               />
             </div>
           )}
@@ -536,13 +542,13 @@ export default function Toolbar({ undo, redo, clear, insertImage }: Props) {
               <ColorGrid
                 colors={STROKE_COLORS}
                 active={store.strokeColor}
-                onPick={store.setStrokeColor}
+                onPick={(c) => { store.setStrokeColor(c); applyStrokeToSelection(c); }}
               />
               <label className="mt-2 flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
                 Custom
                 <input type="color" className="w-6 h-6 cursor-pointer rounded"
                   value={store.strokeColor}
-                  onChange={(e) => store.setStrokeColor(e.target.value)} />
+                  onChange={(e) => { store.setStrokeColor(e.target.value); applyStrokeToSelection(e.target.value); }} />
               </label>
 
               <PanelTitle className="mt-3">Stroke Width</PanelTitle>
@@ -580,14 +586,14 @@ export default function Toolbar({ undo, redo, clear, insertImage }: Props) {
               <ColorGrid
                 colors={FILL_COLORS}
                 active={store.fillColor}
-                onPick={store.setFillColor}
+                onPick={(c) => { store.setFillColor(c); applyFillToSelection(c); }}
                 transparent
               />
               <label className="mt-2 flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
                 Custom
                 <input type="color" className="w-6 h-6 cursor-pointer rounded"
                   value={store.fillColor === 'transparent' ? '#ffffff' : store.fillColor}
-                  onChange={(e) => store.setFillColor(e.target.value)} />
+                  onChange={(e) => { store.setFillColor(e.target.value); applyFillToSelection(e.target.value); }} />
               </label>
             </div>
           )}

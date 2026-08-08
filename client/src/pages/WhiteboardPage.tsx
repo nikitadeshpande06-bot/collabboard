@@ -86,7 +86,8 @@ export default function WhiteboardPage() {
 
   // ── Canvas engine ───────────────────────────────────────────────────────────
   const { undo, redo, clear, toJSON, insertImage, engineRef,
-          copy, cut, paste, deleteSelected, hasSelection } = useWhiteboardCanvas(
+          copy, cut, paste, deleteSelected, hasSelection,
+          insertTableAtCenter, applyFillToSelection, applyStrokeToSelection } = useWhiteboardCanvas(
     CANVAS_ID,
     roomId ?? '',
     user?._id ?? '',
@@ -186,7 +187,15 @@ export default function WhiteboardPage() {
       <div className="flex flex-1 overflow-hidden relative">
 
         {/* Left toolbar */}
-        <Toolbar undo={undo} redo={redo} clear={clear} insertImage={insertImage} />
+        <Toolbar
+          undo={undo}
+          redo={redo}
+          clear={clear}
+          insertImage={insertImage}
+          insertTableAtCenter={insertTableAtCenter}
+          applyFillToSelection={applyFillToSelection}
+          applyStrokeToSelection={applyStrokeToSelection}
+        />
 
         {/* Canvas container */}
         <div

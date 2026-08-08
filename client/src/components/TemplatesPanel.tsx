@@ -375,7 +375,10 @@ export default function TemplatesPanel({ engineRef }: Props) {
 
   function selectTemplate(t: Template) {
     if (t.id === 'blank') {
-      applyFinal(t, null);
+      if (!confirm('Clear the canvas and start from blank?')) return;
+      engineRef.current?.clearCanvas();
+      toast.success('Blank canvas applied');
+      close();
       return;
     }
     setPicked(t);
@@ -384,10 +387,11 @@ export default function TemplatesPanel({ engineRef }: Props) {
 
   async function applyFinal(t: Template, es: EditState | null) {
     if (!engineRef.current) return;
-    if (t.id !== 'blank') {
-      const confirmed = confirm(`Replace current canvas with "${t.name}" template?`);
-      if (!confirmed) return;
-    }
+    const confirmed = confirm(`Replace current canvas with "${t.name}" template?`);
+    if (!confirmed) return;
+
+    // Clear canvas first so remote collaborators also see a reset
+    engineRef.current.clearCanvas();
 
     let json: object;
     switch (es?.kind) {

@@ -31,6 +31,17 @@ export default function LaserPointer({ roomId, socket, canvasContainerRef }: Pro
   const [dots,   setDots]     = useState<Record<string, LaserDot>>({});
   const timeouts = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
+  // ── Block canvas interaction while laser is active ───────────────────────────
+  useEffect(() => {
+    const el = canvasContainerRef.current;
+    if (!el) return;
+    // The upper-canvas is what fabric attaches pointer events to
+    const upperCanvas = el.querySelector<HTMLElement>('.upper-canvas');
+    if (upperCanvas) {
+      upperCanvas.style.pointerEvents = active ? 'none' : '';
+    }
+  }, [active, canvasContainerRef]);
+
   // ── Broadcast own laser position ─────────────────────────────────────────────
   useEffect(() => {
     if (!active) {

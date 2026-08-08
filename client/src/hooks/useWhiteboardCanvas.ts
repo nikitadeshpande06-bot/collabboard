@@ -44,7 +44,7 @@ export function useWhiteboardCanvas(
     engineRef.current = engine;
 
     if (initialCanvasData) {
-      engine.loadFromJSON(initialCanvasData);
+      engine.loadFromJSON(initialCanvasData, true);
     }
 
     // Detect text selection to show/hide TextFormatBar
@@ -97,7 +97,7 @@ export function useWhiteboardCanvas(
     };
 
     const handleCanvasInit = ({ canvasData }: { canvasData: string }) => {
-      engineRef.current?.loadFromJSON(canvasData);
+      engineRef.current?.loadFromJSON(canvasData, true);
     };
 
     socket.on('draw:operation', handleRemote);
@@ -159,16 +159,23 @@ export function useWhiteboardCanvas(
   }, [roomId]);
 
   // ── Exposed actions ─────────────────────────────────────────────────────────
-  const undo          = useCallback(() => engineRef.current?.undo(),          []);
-  const redo          = useCallback(() => engineRef.current?.redo(),          []);
-  const clear         = useCallback(() => engineRef.current?.clearCanvas(),   []);
-  const toJSON        = useCallback(() => engineRef.current?.toJSON() ?? '{}', []);
-  const insertImage   = useCallback(() => engineRef.current?.insertImage(),   []);
-  const copy          = useCallback(() => engineRef.current?.copy(),          []);
-  const cut           = useCallback(() => engineRef.current?.cut(),           []);
-  const paste         = useCallback(() => engineRef.current?.paste(),         []);
-  const deleteSelected= useCallback(() => engineRef.current?.deleteSelected(),[]);
-  const hasSelection  = useCallback(() => engineRef.current?.hasSelection() ?? false, []);
+  const undo               = useCallback(() => engineRef.current?.undo(),                []);
+  const redo               = useCallback(() => engineRef.current?.redo(),                []);
+  const clear              = useCallback(() => engineRef.current?.clearCanvas(),          []);
+  const toJSON             = useCallback(() => engineRef.current?.toJSON() ?? '{}',       []);
+  const insertImage        = useCallback(() => engineRef.current?.insertImage(),          []);
+  const copy               = useCallback(() => engineRef.current?.copy(),                []);
+  const cut                = useCallback(() => engineRef.current?.cut(),                 []);
+  const paste              = useCallback(() => engineRef.current?.paste(),               []);
+  const deleteSelected     = useCallback(() => engineRef.current?.deleteSelected(),      []);
+  const hasSelection       = useCallback(() => engineRef.current?.hasSelection() ?? false, []);
+  const insertTableAtCenter= useCallback(() => engineRef.current?.insertTableAtCenter(), []);
+  const applyFillToSelection  = useCallback((c: string) => engineRef.current?.applyFillToSelection(c),  []);
+  const applyStrokeToSelection= useCallback((c: string) => engineRef.current?.applyStrokeToSelection(c),[]);
 
-  return { undo, redo, clear, toJSON, insertImage, engineRef, copy, cut, paste, deleteSelected, hasSelection };
+  return {
+    undo, redo, clear, toJSON, insertImage, engineRef,
+    copy, cut, paste, deleteSelected, hasSelection,
+    insertTableAtCenter, applyFillToSelection, applyStrokeToSelection,
+  };
 }
