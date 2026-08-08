@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd client && npm install && ./node_modules/.bin/vite build",
+  "buildCommand": "cd client && npm ci && npm run build",
   "outputDirectory": "client/dist",
   "installCommand": "echo skip",
   "rewrites": [
