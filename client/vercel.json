@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "collabboard-production-933a.up.railway.app"
+      "destination": "https://collabboard-production-933a.up.railway.app/api/:path*"
     },
     {
       "source": "/(.*)",
