@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main]
 
-# Give the GITHUB_TOKEN enough scope for GHCR pushes
+# Minimal permissions — packages:write is needed to push to GHCR
 permissions:
   contents: read
   packages: write
@@ -86,7 +86,6 @@ jobs:
         run: npm ci
 
       - name: Lint
-        # Warnings are fine — only hard errors fail CI
         run: npm run lint -- --max-warnings 9999
 
       - name: Build
@@ -100,7 +99,7 @@ jobs:
     name: Docker Build & Push
     runs-on: ubuntu-latest
     needs: [backend, frontend]
-    # Only push images on merges to main — not on PRs
+    # Only run on direct pushes to main, not PRs
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
@@ -122,8 +121,6 @@ jobs:
           context: ./server
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/collabboard-server:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Build and push client image
         uses: docker/build-push-action@v5
@@ -131,9 +128,6 @@ jobs:
           context: ./client
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/collabboard-client:latest
-          # Pass real backend URL into the Vite build inside Docker
           build-args: |
             VITE_API_URL=https://collabboard-production-933a.up.railway.app/api
             VITE_SOCKET_URL=https://collabboard-production-933a.up.railway.app
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
