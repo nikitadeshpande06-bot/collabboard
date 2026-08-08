@@ -23,6 +23,9 @@ import chatRouter    from './routes/chat.routes';
 const app = express();
 const httpServer = http.createServer(app);
 
+// Trust Railway/Vercel reverse proxy
+app.set('trust proxy', 1);
+
 // ── Security & Utility Middleware ─────────────────────────────────────────────
 app.use(helmet());
 app.use(cors({
