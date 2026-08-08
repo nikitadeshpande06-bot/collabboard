@@ -1,0 +1,15 @@
+# This workflow exists solely to prevent GitHub Pages from auto-deploying.
+# This project is deployed on Vercel — GitHub Pages is not used.
+# Disable GitHub Pages in: Repo Settings → Pages → Source → set to "None"
+name: Disable GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  skip:
+    name: Not deployed via GitHub Pages
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "This project is deployed on Vercel. GitHub Pages is disabled."
