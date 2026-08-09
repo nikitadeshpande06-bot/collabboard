@@ -1,4 +1,5 @@
 {
+  "installCommand": "npm ci",
   "buildCommand": "VITE_API_URL=/api VITE_SOCKET_URL=https://collabboard-production-933a.up.railway.app npm run build",
   "outputDirectory": "dist",
   "rewrites": [
