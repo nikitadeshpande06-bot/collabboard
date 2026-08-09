@@ -47,9 +47,10 @@ const STROKE_COLORS = [
 ];
 
 const FILL_COLORS = [
-  'transparent','#fef2f2','#fff7ed','#fefce8',
-  '#f0fdf4','#eff6ff','#f5f3ff','#fdf4ff',
-  '#ffffff','#f1f5f9',
+  'transparent','#fef2f2','#fff7ed','#fefce8','#f0fdf4',
+  '#eff6ff','#f5f3ff','#fdf4ff','#ffffff','#f1f5f9',
+  // Dark fill options
+  '#1f2937','#374151','#4b5563','#111827','#0f172a',
 ];
 
 const STICKY_COLORS = [

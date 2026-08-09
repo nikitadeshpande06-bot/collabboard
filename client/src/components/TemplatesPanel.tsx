@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import type { CanvasEngine } from '@/canvas/CanvasEngine';
+import { useCanvasStore } from '@/store/canvasStore';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -424,12 +425,20 @@ export default function TemplatesPanel({ engineRef }: Props) {
         json = { version: '5.3.0', objects: [] };
     }
 
-    // silent=true so the template objects are NOT re-broadcast as 'add'
-    // operations. Without it, each object (which has no id) triggers
-    // object:added → emitAdd → server echo → applyRemoteOperation → re-add,
-    // causing a feedback loop that makes the cursor/pencil/laser appear to
-    // continuously move as the mouse moves.
-    await engineRef.current.loadFromJSON(JSON.stringify(json), true);
+    // loadTemplate assigns stable ids to every object BEFORE loading, then
+    // explicitly broadcasts each object as an 'add' operation. This:
+    //   1. stops the old feedback loop (object:added → emitAdd → server echo →
+    //      applyRemoteOperation → re-add) that made the board appear to keep
+    //      moving while the mouse moved, and
+    //   2. ensures collaborators actually receive the template (a fully silent
+    //      load never assigned ids, so later resize/move/fill changes were
+    //      silently dropped and peers saw an empty board).
+    await engineRef.current.loadTemplate(JSON.stringify(json));
+
+    // Switch back to the select tool so clicking the canvas right after
+    // applying a template doesn't place stray shapes or keep "moving".
+    useCanvasStore.getState().setTool('select');
+
     toast.success(`"${t.name}" template loaded`);
     close();
   }

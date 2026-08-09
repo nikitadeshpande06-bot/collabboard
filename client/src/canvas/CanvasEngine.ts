@@ -84,6 +84,12 @@ export class CanvasEngine {
   private isReplaying = false;
   private clipboard: fabric.Object[] = [];   // cut/copy buffer
 
+  /** Pan drag state — kept on the instance so applyTool() can cancel any
+   *  in-progress drag (prevents the canvas from "continuously moving" when
+   *  the mouse was released outside the canvas). */
+  private panState: { isDragging: boolean; lastPosX: number; lastPosY: number } =
+    { isDragging: false, lastPosX: 0, lastPosY: 0 };
+
   /** Expose canvas instance so hooks can attach extra listeners */
   get fabricCanvas(): fabric.Canvas { return this.fc; }
 
@@ -118,10 +124,54 @@ export class CanvasEngine {
   loadFromJSON(json: string, silent = false): Promise<void> {
     return new Promise((resolve) => {
       const wasReplaying = this.isReplaying;
+      const parsed = JSON.parse(json);
+
+      // Ensure every object has a unique id. Silent loads (templates, room
+      // init) skip the object:added handler that normally assigns ids. Without
+      // ids, later modify/remove/fill operations are silently dropped, which
+      // makes template objects appear "stuck" or unresponsive to collaborators.
+      (parsed.objects ?? []).forEach((obj: Record<string, unknown>) => {
+        if (!obj.id) obj.id = uuidv4();
+      });
+
       if (silent) this.isReplaying = true;
-      this.fc.loadFromJSON(JSON.parse(json), () => {
+      this.fc.loadFromJSON(parsed, () => {
         this.fc.renderAll();
         if (silent) this.isReplaying = wasReplaying;
+        this.snapshotHistory();
+        resolve();
+      });
+    });
+  }
+
+  /**
+   * Load a template from JSON and broadcast every created object to the room.
+   *
+   * Objects receive stable ids up-front, so the object:added handler will NOT
+   * re-broadcast them (previously the source of the add-feedback loop that made
+   * the canvas appear to move continuously). After loading, each object is
+   * explicitly emitted as an 'add' operation so collaborators get the same
+   * template instead of an empty board.
+   */
+  loadTemplate(json: string): Promise<void> {
+    return new Promise((resolve) => {
+      const parsed = JSON.parse(json);
+
+      // Assign stable ids BEFORE loading — the silent (isReplaying) load skips
+      // the object:added id-assignment, but ids are required for future
+      // modify/remove/fill operations to broadcast correctly.
+      (parsed.objects ?? []).forEach((obj: Record<string, unknown>) => {
+        if (!obj.id) obj.id = uuidv4();
+      });
+
+      this.isReplaying = true;
+      this.fc.loadFromJSON(parsed, () => {
+        this.fc.renderAll();
+        this.isReplaying = false;
+
+        // Synchronise the template with all collaborators (each carries its id).
+        this.fc.getObjects().forEach((o) => this.emitAdd(o));
+
         this.snapshotHistory();
         resolve();
       });
@@ -137,6 +187,11 @@ export class CanvasEngine {
     canvas.isDrawingMode = false;
     canvas.selection     = false;
     canvas.discardActiveObject();
+
+    // Cancel any in-progress pan drag when switching tools. Without this, if
+    // the mouse was released outside the canvas the pan flag stays true and
+    // the canvas keeps sliding on every subsequent mousemove.
+    this.panState.isDragging = false;
 
     switch (tool) {
       case 'select':
@@ -441,30 +496,37 @@ export class CanvasEngine {
   applyFillToSelection(fill: string): void {
     const active = this.fc.getActiveObject();
     if (!active) return;
-    const applyOne = (o: fabric.Object) => {
-      o.set({ fill: fill === 'transparent' ? 'rgba(0,0,0,0)' : fill });
-    };
-    if ((active as fabric.ActiveSelection).getObjects) {
-      (active as fabric.ActiveSelection).getObjects().forEach(applyOne);
-    } else {
-      applyOne(active);
-    }
+    const selected: fabric.Object[] = (active as fabric.ActiveSelection).getObjects
+      ? (active as fabric.ActiveSelection).getObjects()
+      : [active];
+    const value = fill === 'transparent' ? 'rgba(0,0,0,0)' : fill;
+
+    // Emit a separate modify op per object — an ActiveSelection wrapper has no
+    // id, so emitModify(active) is silently dropped and collaborators never
+    // receive the fill change (they see the old/dark colour).
+    selected.forEach((o) => {
+      o.set({ fill: value });
+      // Coerce the (possibly untyped) fabric object so TS allows .id
+      (o as fabric.Object & { id?: string }).id = (o as fabric.Object & { id?: string }).id ?? uuidv4();
+      this.emitModify(o);
+    });
     this.fc.renderAll();
-    this.emitModify(active);
     this.snapshotHistory();
   }
 
   applyStrokeToSelection(stroke: string): void {
     const active = this.fc.getActiveObject();
     if (!active) return;
-    const applyOne = (o: fabric.Object) => { o.set({ stroke }); };
-    if ((active as fabric.ActiveSelection).getObjects) {
-      (active as fabric.ActiveSelection).getObjects().forEach(applyOne);
-    } else {
-      applyOne(active);
-    }
+    const selected: fabric.Object[] = (active as fabric.ActiveSelection).getObjects
+      ? (active as fabric.ActiveSelection).getObjects()
+      : [active];
+
+    selected.forEach((o) => {
+      o.set({ stroke });
+      (o as fabric.Object & { id?: string }).id = (o as fabric.Object & { id?: string }).id ?? uuidv4();
+      this.emitModify(o);
+    });
     this.fc.renderAll();
-    this.emitModify(active);
     this.snapshotHistory();
   }
 
@@ -698,9 +760,7 @@ export class CanvasEngine {
       this.snapshotHistory();
     });
 
-    // Pan state (side-channel to avoid TS property errors)
-    type PanState = { isDragging: boolean; lastPosX: number; lastPosY: number };
-    const pan: PanState = { isDragging: false, lastPosX: 0, lastPosY: 0 };
+    const pan = this.panState;
 
     this.fc.on('mouse:down', (opt) => {
       const e = opt.e as MouseEvent;
@@ -725,6 +785,13 @@ export class CanvasEngine {
         pan.lastPosY = e.clientY;
         this.fc.requestRenderAll();
       }
+    });
+
+    // If the cursor leaves the canvas while dragging, stop panning. Fabric
+    // won't fire mouse:up when the release happens outside the canvas, which
+    // previously left isDragging=true and the board kept sliding.
+    this.fc.on('mouse:leave', () => {
+      pan.isDragging = false;
     });
 
     this.fc.on('mouse:up', (opt) => {
