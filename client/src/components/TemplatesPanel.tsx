@@ -424,7 +424,12 @@ export default function TemplatesPanel({ engineRef }: Props) {
         json = { version: '5.3.0', objects: [] };
     }
 
-    await engineRef.current.loadFromJSON(JSON.stringify(json));
+    // silent=true so the template objects are NOT re-broadcast as 'add'
+    // operations. Without it, each object (which has no id) triggers
+    // object:added → emitAdd → server echo → applyRemoteOperation → re-add,
+    // causing a feedback loop that makes the cursor/pencil/laser appear to
+    // continuously move as the mouse moves.
+    await engineRef.current.loadFromJSON(JSON.stringify(json), true);
     toast.success(`"${t.name}" template loaded`);
     close();
   }
