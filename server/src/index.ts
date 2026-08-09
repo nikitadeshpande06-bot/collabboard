@@ -38,11 +38,14 @@ app.use(morgan('dev'));
 app.use(passport.initialize());
 
 // Global rate limiter (100 req / 15 min per IP)
+// Skip the healthcheck endpoint so Railway's healthcheck pings are never
+// rate-limited (otherwise the deployment is marked unhealthy after 100 pings).
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.path === '/api/health',
 }));
 
 // ── Routes ────────────────────────────────────────────────────────────────────
