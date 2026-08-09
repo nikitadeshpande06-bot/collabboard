@@ -1,0 +1,27 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+
+# Environment files — never bake real secrets into images
+.env
+.env.*
+!.env.example
+
+# Test / coverage
+coverage
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
