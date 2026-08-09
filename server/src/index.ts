@@ -70,12 +70,29 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 const PORT = parseInt(process.env.PORT ?? '4000', 10);
 
 async function bootstrap() {
-  await connectDB();
-  await connectRedis();
-  await initSocket(httpServer);
+  // Start listening FIRST so /api/health always responds — deployment
+  // healthchecks must never fail because a dependency (Mongo/Redis) is
+  // slow or temporarily unreachable.
   httpServer.listen(PORT, () => {
     logger.info(`🚀 Server running on http://localhost:${PORT}`);
   });
+
+  // Connect dependencies in the background. A failure here is logged but
+  // does NOT crash the process — the deployment stays healthy and API
+  // requests surface 500s until the dependency recovers.
+  try {
+    await connectDB();
+  } catch (err) {
+    logger.error('MongoDB connection failed (non-fatal):', (err as Error).message);
+  }
+
+  try {
+    await connectRedis();
+  } catch (err) {
+    logger.warn('Redis unavailable — running without it (single-instance mode)');
+  }
+
+  await initSocket(httpServer);
 }
 
 // Only boot the server when NOT running under Jest/test environment.
