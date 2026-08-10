@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
-  base: '/',
+  base: process.env.GITHUB_ACTIONS ? '/collabboard/' : '/',
   plugins: [
     react({
       // Babel fast-refresh only for files that actually use React hooks/JSX
